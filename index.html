@@ -55,7 +55,7 @@ body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   font-size: 18px;
   line-height: 1.55;
-  padding: 0 28px 80px;
+  padding: 0 28px 20px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -1861,7 +1861,15 @@ h1 {
   <div id="bg-img-b" class="bg-img"></div>
 </div>
 
-<h1>Instigo</h1>
+<div class="ficha-header-bar">
+  <h1>Instigo</h1>
+  <div class="ficha-header-save">
+    <span id="save-status">Nenhuma ficha carregada.</span>
+    <button class="save-btn" onclick="fichaImportar()">Carregar ficha</button>
+    <button class="save-btn primary" onclick="fichaExportar()">Salvar arquivo</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="fichaImportarArquivo(this)">
+  </div>
+</div>
 
 <!-- ══ CALCULADORA DE DADOS ══ -->
 <!-- Floating button -->
@@ -2024,7 +2032,7 @@ h1 {
   <div class="personagem-dados">
     <div class="dado-pessoal-row">
       <label>Nome</label>
-      <input type="text" id="pers-nome" placeholder="Nome do personagem">
+      <input type="text" id="pers-nome" placeholder="Nome do personagem" oninput="document.title = this.value ? this.value + ' — Instigo' : 'Instigo'">
     </div>
     <div class="dado-pessoal-row">
       <label>Ocupação</label>
@@ -9339,15 +9347,31 @@ bgAtualizar(null, null);
 
 <style>
 /* ══ SAVE/LOAD ══ */
-#save-bar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--bg2); border-top: 1px solid var(--border2);
-  display: flex; align-items: center; gap: 10px; padding: 8px 20px;
-  z-index: 400; flex-wrap: wrap;
+/* ══ FICHA HEADER BAR ══ */
+.ficha-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+.ficha-header-bar h1 {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 12px;
+}
+.ficha-header-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 0;
 }
 #save-status {
-  font-size: .75em; color: var(--text3); flex: 1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: .75em; color: var(--text3);
+  white-space: nowrap;
 }
 #save-status.dirty { color: #f1c040; }
 #save-status.saved { color: var(--green); }
@@ -9392,13 +9416,7 @@ bgAtualizar(null, null);
 .nome-modal-footer { display: flex; justify-content: flex-end; gap: 8px; }
 </style>
 
-<!-- Barra de save fixa no rodapé -->
-<div id="save-bar">
-  <span id="save-status">Nenhuma ficha carregada.</span>
-  <button class="save-btn" onclick="fichaImportar()">Carregar ficha</button>
-  <button class="save-btn primary" onclick="fichaExportar()">Salvar arquivo</button>
-  <input type="file" id="import-input" accept=".json" style="display:none" onchange="fichaImportarArquivo(this)">
-</div>
+
 
 <!-- Modal de nome do personagem -->
 <div class="nome-modal-overlay" id="nome-modal-overlay">
