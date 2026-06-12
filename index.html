@@ -1867,6 +1867,7 @@ h1 {
     <span id="save-status">Nenhuma ficha carregada.</span>
     <button class="save-btn" onclick="fichaImportar()">Carregar ficha</button>
     <button class="save-btn primary" onclick="fichaExportar()">Salvar arquivo</button>
+    <button class="save-btn reset" onclick="fichaReset()">Resetar ficha</button>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="fichaImportarArquivo(this)">
   </div>
 </div>
@@ -2533,6 +2534,15 @@ h1 {
     </div>
 
     <!-- Custo de aquisição (se não grátis) -->
+    <!-- Sem custo toggle -->
+    <div class="feitico-form-row" style="margin-bottom:6px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.88em;">
+        <input type="checkbox" id="feitico-sem-custo" onchange="feiticoToggleSemCusto(this.checked)"
+          style="width:16px;height:16px;cursor:pointer;">
+        Sem custo de PP (feitiço livre / narrativo)
+      </label>
+    </div>
+
     <div id="feitico-custo-acq-box">
       <div class="feitico-form-row">
         <label>Fontes de PP</label>
@@ -2689,6 +2699,18 @@ function blendColor(overlay, base, ratio) {
 // DADOS ESTÁTICOS
 // ════════════════════════════════════════════════════════
 const ATRIBUTOS = ["Poder","Conhecimento","Desespero","Vida","Prazer","Justiça"];
+
+// Nomes de exibição dos atributos (usados em atributos e perícias)
+// Os rudimentos mantêm seus próprios nomes em progressão/habilidades/feitiços
+const ATRIB_DISPLAY = {
+  "Poder":        "Combate",
+  "Conhecimento": "Mental",
+  "Desespero":    "Psicológico",
+  "Vida":         "Físico",
+  "Prazer":       "Perspicácia",
+  "Justiça":      "Dedicação",
+};
+function atribDisplay(a) { return ATRIB_DISPLAY[a] || a; }
 
 const PERICIAS_POR_ATRIBUTO = {
   "Poder":     ["Desarmado","Armas Brancas","Armas de Fogo","Armas Exóticas"],
@@ -3832,7 +3854,7 @@ function calcAtualizarAtributos() {
   ATRIBUTOS.forEach(a => {
     const opt = document.createElement("option");
     opt.value = a;
-    opt.textContent = `${a} (${valorAtribEfetivo(a)})`;
+    opt.textContent = `${atribDisplay(a)} (${valorAtribEfetivo(a)})`;
     sel.appendChild(opt);
   });
   if (cur) sel.value = cur;
@@ -4713,7 +4735,7 @@ ATRIBUTOS.forEach(nome=>{
   bloco.innerHTML=`
     <div class="atributo-header">
       <span class="drag-handle" title="Arrastar para reordenar">⠿⠿</span>
-      <div class="atributo-nome">${nome}</div>
+      <div class="atributo-nome">${atribDisplay(nome)}</div>
       <div class="atributo-valor">
         <button type="button" id="menos-${nome}" onclick="mudarAtributo('${nome}',-1)">−</button>
         <div class="valor" id="val-${nome}">1</div>
@@ -4737,7 +4759,7 @@ ATRIBUTOS.forEach(atrib=>{
   // Mark if this pericia group belongs to a connected rudimento
   if (atrib === progState.primario)   grupoEl.classList.add("rud-prim-grupo");
   if (atrib === progState.secundario) grupoEl.classList.add("rud-sec-grupo");
-  let html=`<div class="pericia-grupo-titulo">${atrib}<span class="pericia-grupo-pontos" id="pts-pericia-${atrib}"></span></div>`;
+  let html=`<div class="pericia-grupo-titulo">${atribDisplay(atrib)}<span class="pericia-grupo-pontos" id="pts-pericia-${atrib}"></span></div>`;
 
   PERICIAS_POR_ATRIBUTO[atrib].forEach(p=>{
     const pEsc=cssId(p);
@@ -6118,7 +6140,7 @@ function renderPAAtributos() {
     const baseVal  = atributos[atrib]   || 0;
     const maxAplicavel = Math.min(qtd, Math.max(0, 5 - baseVal));
     html += `<div class="info-pa-atrib-row">
-      <label>${atrib} (base: ${baseVal})</label>
+      <label>${atribDisplay(atrib)} (base: ${baseVal})</label>
       <button type="button" onclick="mudarPA('${atrib}',-1)" style="width:22px;height:22px;cursor:pointer;border:1px solid #ccc;border-radius:3px;background:#eee;">−</button>
       <input type="number" id="pa-val-${cssId(atrib)}" value="${aplicado}" min="0" max="${maxAplicavel}" readonly
         style="width:40px;text-align:center;border:1px solid #ccc;border-radius:4px;padding:2px;">
@@ -7527,8 +7549,15 @@ function setHabFontePericia(idx, val) {
 }
 
 function setHabFontePP(idx, val) {
-  const f    = habFontesTemp[idx];
-  const disp = ppLiquidoHab(f.pericia, idx);
+  const f = habFontesTemp[idx];
+  let disp;
+  if (f.tipo === "upagem") {
+    disp = ppUpagemDisponiveisExcluindo("hab", idx);
+  } else if (f.tipo === "livre") {
+    disp = ppLivresAtribExcluindo(f.atrib, "hab", idx);
+  } else {
+    disp = ppLiquidoHab(f.pericia, idx);
+  }
   f.pp = Math.max(0, Math.min(val, disp));
   renderHabFontes();
 }
@@ -7821,8 +7850,7 @@ function renderFeiticosLista() {
         ${f.desc       ? `<div class="feitico-desc">${escHTML(f.desc)}</div>` : ""}
         <div class="feitico-actions">
           <button type="button" class="feitico-btn-edit" onclick="abrirModalFeitico(${f.id})">Editar</button>
-          ${!f.gratis ? `<button type="button" class="feitico-btn-del" onclick="removerFeitico(${f.id})">× Remover</button>` : ""}
-          ${f.gratis  ? `<button type="button" class="feitico-btn-del" onclick="removerFeiticoGratis(${f.id})">× Remover</button>` : ""}
+          <button type="button" class="feitico-btn-del" onclick="removerFeiticoQualquer(${f.id})">× Remover</button>
         </div>
       </div>`;
     });
@@ -7860,6 +7888,9 @@ function abrirModalFeitico(id) {
       _feiticoFontesTemp = [...(f.fontes || [])];
     }
     _feiticoDadosTemp = [...(f.dados || [])];
+    // Restore sem-custo checkbox
+    const chk = document.getElementById("feitico-sem-custo");
+    if (chk) { chk.checked = !!f.gratis; }
     // Show/hide cost box
     const box = document.getElementById("feitico-custo-acq-box");
     if (box) box.style.display = f.gratis ? "none" : "block";
@@ -7875,14 +7906,21 @@ function abrirModalFeitico(id) {
     document.getElementById("feitico-desc").value     = "";
     _feiticoFontesTemp = [];
     _feiticoDadosTemp = [];
+    // Reset sem-custo checkbox
+    const chk = document.getElementById("feitico-sem-custo");
+    if (chk) { chk.checked = false; }
     const box = document.getElementById("feitico-custo-acq-box");
-    if (box) box.style.display = "block";
-  }
+    if (box) box.style.display = "block";  }
 
   feiticorenderDados();
   feiticoRenderFontes();
   feiticoAtualizarCustoInfo();
   document.getElementById("feitico-modal-overlay").classList.add("open");
+}
+
+function feiticoToggleSemCusto(checked) {
+  const box = document.getElementById("feitico-custo-acq-box");
+  if (box) box.style.display = checked ? "none" : "block";
 }
 
 function fecharModalFeitico() {
@@ -8067,56 +8105,71 @@ function salvarFeitico() {
 
   // Check if editing a gratis feitico (no cost needed)
   const isGratis = _feiticoEditId !== null && feiticos.find(x => x.id === _feiticoEditId)?.gratis;
+  const semCusto = document.getElementById("feitico-sem-custo")?.checked || false;
 
-  if (!isGratis) {
+  if (!isGratis && !semCusto) {
     if (!_feiticoFontesTemp.length) { alert("Adicione ao menos uma perícia fonte de PP."); return; }
     const totalPP = _feiticoFontesTemp.reduce((s, f) => s + f.pp, 0);
     if (totalPP < 1) { alert("Aloque ao menos 1 PP."); return; }
     // Validate each fonte
     for (const ft of _feiticoFontesTemp) {
-      if (!ft.pericia) { alert("Selecione a perícia para todas as fontes."); return; }
-      const disp = feiticoPPDisponivel(ft.pericia, _feiticoFontesTemp.indexOf(ft));
-      if (ft.pp > disp + ft.pp) { alert(`PP insuficientes em ${ft.pericia}.`); return; }
+      if (ft.tipo === "pericia" && !ft.pericia) { alert("Selecione a perícia para todas as fontes."); return; }
+      const disp = ft.tipo === "pericia" ? feiticoPPDisponivel(ft.pericia, _feiticoFontesTemp.indexOf(ft)) : 99999;
+      if (ft.pp > disp + ft.pp) { alert(`PP insuficientes em ${ft.pericia || ft.atrib}.`); return; }
     }
     const fontes = [..._feiticoFontesTemp];
     const pp = totalPP;
 
     if (_feiticoEditId !== null) {
       const idx = feiticos.findIndex(x => x.id === _feiticoEditId);
-      if (idx !== -1) feiticos[idx] = { ...feiticos[idx], nome, rudimento, tipo, alcance, pm, duracao, desc, dados, pp, fontes };
+      if (idx !== -1) feiticos[idx] = { ...feiticos[idx], nome, rudimento, tipo, alcance, pm, duracao, desc, dados, pp, fontes, gratis: false };
     } else {
       feiticos.push({ id: feiticoNextId++, nome, rudimento, tipo, alcance, pm, duracao, desc, dados, pp, fontes, gratis: false });
     }
   } else {
-    const idx = feiticos.findIndex(x => x.id === _feiticoEditId);
-    if (idx !== -1) feiticos[idx] = { ...feiticos[idx], nome, rudimento, tipo, alcance, pm, duracao, desc, dados };
+    // sem custo ou grátis — salva sem PP
+    if (_feiticoEditId !== null) {
+      const idx = feiticos.findIndex(x => x.id === _feiticoEditId);
+      if (idx !== -1) feiticos[idx] = { ...feiticos[idx], nome, rudimento, tipo, alcance, pm, duracao, desc, dados, pp: 0, fontes: [], gratis: semCusto || isGratis };
+    } else {
+      feiticos.push({ id: feiticoNextId++, nome, rudimento, tipo, alcance, pm, duracao, desc, dados, pp: 0, fontes: [], gratis: true });
+    }
   }
 
   fecharModalFeitico();
   renderFeiticos();
 }
 
-function removerFeitico(id) {
+function removerFeiticoQualquer(id) {
   const f = feiticos.find(x => x.id === id);
-  if (!f || f.gratis) return;
-  if (!confirm(`Remover "${f.nome}"? Os PP gastos serão devolvidos.`)) return;
-  feiticos.splice(feiticos.findIndex(x => x.id === id), 1);
+  if (!f) return;
+  const msg = f.gratis && f.fontes?.length === 0
+    ? `Remover "${f.nome}"?`
+    : `Remover "${f.nome}"? Os PP gastos serão devolvidos.`;
+  if (!confirm(msg)) return;
+  if (f.gratis) {
+    ["prim","sec"].forEach(rud => {
+      progState.escolhas[rud] = (progState.escolhas[rud]||[]).filter(
+        e => !(e.sub === f.nome && (e.opcao === "feitco" || e.opcao === "feitco5"))
+      );
+    });
+  }
+  const idx = feiticos.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  feiticos.splice(idx, 1);
+  // Persist immediately so load doesn't restore removed feitiço
+  if (typeof fichaAutoSave === "function") fichaAutoSave();
   renderFeiticos();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
+  if (f.gratis) atualizarProgressao();
+}
+
+function removerFeitico(id) {
+  removerFeiticoQualquer(id);
 }
 
 function removerFeiticoGratis(id) {
-  const f = feiticos.find(x => x.id === id);
-  if (!f) return;
-  if (!confirm(`Remover "${f.nome}"? (feitiço adquirido por progressão — sem custo de PP)`)) return;
-  // Also remove from progState.escolhas so the level choice can be re-done
-  ["prim","sec"].forEach(rud => {
-    progState.escolhas[rud] = progState.escolhas[rud].filter(
-      e => !(e.sub === f.nome && (e.opcao === "feitco" || e.opcao === "feitco5"))
-    );
-  });
-  feiticos.splice(feiticos.findIndex(x => x.id === id), 1);
-  renderFeiticos();
-  atualizarProgressao();
+  removerFeiticoQualquer(id);
 }
 
 // Called when a feitiço is added via level-up choice
@@ -9375,6 +9428,15 @@ bgAtualizar(null, null);
 }
 #save-status.dirty { color: #f1c040; }
 #save-status.saved { color: var(--green); }
+.save-btn.reset {
+  background: transparent;
+  border-color: rgba(255,68,68,.4);
+  color: var(--red, #ff4444);
+}
+.save-btn.reset:hover {
+  background: rgba(255,68,68,.15);
+  border-color: var(--red, #ff4444);
+}
 .save-btn {
   padding: 5px 14px; font-size: .8em; font-weight: 600;
   border-radius: var(--r); border: 1px solid var(--border2);
@@ -9692,6 +9754,25 @@ function fichaGerarNomeArquivo(nome) {
 }
 
 // ── Import de arquivo JSON ─────────────────────────────────
+
+function fichaReset() {
+  if (!confirm(
+    "Tem certeza que deseja resetar a ficha?\n\n" +
+    "TODOS os dados serão apagados permanentemente:\n" +
+    "atributos, perícias, habilidades, feitiços, inventário,\n" +
+    "progressão, anotações e configurações.\n\n" +
+    "Esta ação não pode ser desfeita."
+  )) return;
+
+  // Clear localStorage
+  localStorage.removeItem("ficha-rpg-autosave");
+  localStorage.removeItem("ficha-rpg-anotacoes");
+  localStorage.removeItem("ficha-rpg-anot-rich");
+
+  // Reload page fresh
+  location.reload();
+}
+
 function fichaImportar() {
   document.getElementById("import-input").click();
 }
