@@ -1398,7 +1398,7 @@ button[onclick*="armaRemoverDado"], button[onclick*="invRemover"] {
 /* Dano */
 .dano-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
 .dano-row label { font-size:.76em; color:var(--text3); min-width:38px; }
-.dano-qty { width:42px; padding:4px 6px; background:var(--bg3); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); text-align:center; }
+.dano-qty { width:58px; padding:7px 8px; background:var(--bg3); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); text-align:center; font-size:1em; font-weight:700; }
 .dano-face-sel { padding:4px 6px; background:var(--bg3); border:1px solid var(--border2); color:var(--text); border-radius:var(--r); }
 .dano-result { margin-top:8px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r); padding:8px 12px; font-size:.86em; display:none; }
 .dano-result.visible { display:block; }
