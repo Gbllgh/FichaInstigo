@@ -431,11 +431,22 @@
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="como-abrir">Como Abrir</h2>
 
-    <ol class="steps">
-      <li>Baixe todos os arquivos para uma pasta no seu computador.</li>
-      <li>Clique duas vezes em <code>index.html</code> — ele abre no seu navegador padrão.</li>
-      <li>Para compartilhar com amigos: suba para o <a href="https://app.netlify.com/drop" style="color:var(--accent)">Netlify Drop</a> arrastando a pasta inteira.</li>
-    </ol>
+    <div class="card card-accent-green">
+      <h4 style="margin-top:0">Acesso Online (recomendado)</h4>
+      <p>A ficha já está publicada e pode ser acessada diretamente pelo browser, sem baixar nada:</p>
+      <p><a href="https://instigoficha.netlify.app/" target="_blank" style="color:var(--accent);font-size:1.05em;font-weight:700;">🌐 instigoficha.netlify.app</a></p>
+      <p style="font-size:.82em;color:var(--text3);margin-top:4px;">Funciona em qualquer dispositivo — PC, celular ou tablet. Basta abrir o link no browser.</p>
+    </div>
+
+    <div class="card card-accent-blue">
+      <h4 style="margin-top:0">Acesso Local (arquivos)</h4>
+      <p>Se preferir rodar localmente a partir dos arquivos:</p>
+      <ol class="steps" style="margin-top:10px;">
+        <li>Baixe todos os arquivos para uma pasta no seu computador.</li>
+        <li>Clique duas vezes em <code>index.html</code> — ele abre no seu navegador padrão.</li>
+        <li>Os arquivos PNG de imagem precisam estar na mesma pasta que o <code>index.html</code>.</li>
+      </ol>
+    </div>
 
     <div class="callout callout-info">
       Os dados do personagem são salvos automaticamente no <strong>localStorage</strong> do browser — isso significa que cada jogador tem sua própria ficha salva no próprio computador ou celular. Para carregar em outro dispositivo, use o botão <strong>Salvar arquivo</strong> para exportar um <code>.json</code>.
@@ -469,12 +480,12 @@
     <h2 id="atributos">Atributos & Perícias</h2>
 
     <div class="callout callout-info">
-      <strong>Importante:</strong> Os atributos têm dois nomes. O nome na ficha (visível ao jogador) é o nome antigo do sistema. O nome do rudimento é o nome novo usado na progressão e habilidades. Eles são a mesma coisa, só com nomes diferentes em contextos diferentes.
+      <strong>Atributos ≠ Rudimentos.</strong> São conceitos distintos. Os <strong>Rudimentos</strong> representam a conexão espiritual/filosófica do personagem (Poder, Conhecimento, etc.) e governam a progressão. Os <strong>Atributos</strong> (Combate, Mental, etc.) são as capacidades práticas do personagem — cada atributo é <em>conectado</em> a um rudimento, mas têm propósitos diferentes na ficha.
     </div>
 
     <table>
       <thead>
-        <tr><th>Nome na ficha</th><th>Nome do rudimento</th><th>Cor</th></tr>
+        <tr><th>Atributo</th><th>Rudimento conectado</th><th>Cor</th></tr>
       </thead>
       <tbody>
         <tr><td>Combate</td><td><span class="rud-poder">Poder</span></td><td><code>--c-poder</code></td></tr>
