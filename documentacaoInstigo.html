@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentação — Ficha Instigo</title>
+  <style>
+    :root {
+      --bg:      #111318;
+      --bg2:     #1c1f26;
+      --bg3:     #252830;
+      --bg4:     #2e3240;
+      --text:    #e8e8f0;
+      --text2:   #b0b8c8;
+      --text3:   #6a7080;
+      --accent:  #74a8ff;
+      --accent2: #1e3a6a;
+      --green:   #55d97a;
+      --red:     #ff4444;
+      --yellow:  #e8b84b;
+      --border:  #2e3240;
+      --border2: #3d4258;
+      --r:       6px;
+      --r2:      10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border2);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 0;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border2);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo h1 {
+      font-size: 1.2em;
+      color: var(--accent);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .sidebar-logo p { font-size: .72em; color: var(--text3); margin-top: 2px; }
+
+    .sidebar-section { margin-bottom: 4px; }
+    .sidebar-section-title {
+      padding: 6px 20px;
+      font-size: .65em;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text3);
+      font-weight: 700;
+    }
+    .sidebar a {
+      display: block;
+      padding: 6px 20px 6px 28px;
+      color: var(--text2);
+      text-decoration: none;
+      font-size: .82em;
+      border-left: 2px solid transparent;
+      transition: all .12s;
+    }
+    .sidebar a:hover { color: var(--text); background: var(--bg3); }
+    .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent2); }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 48px;
+      max-width: 900px;
+    }
+
+    /* ── Typography ── */
+    h1.page-title {
+      font-size: 2em;
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+    .page-subtitle { color: var(--text3); font-size: .9em; margin-bottom: 40px; }
+
+    h2 {
+      font-size: 1.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      border-bottom: 1px solid var(--border2);
+      padding-bottom: 8px;
+      margin: 48px 0 16px;
+      scroll-margin-top: 20px;
+    }
+    h2:first-of-type { margin-top: 0; }
+    h3 {
+      font-size: 1em;
+      color: var(--yellow);
+      margin: 28px 0 10px;
+      scroll-margin-top: 20px;
+    }
+    h4 { font-size: .9em; color: var(--green); margin: 18px 0 8px; }
+
+    p { color: var(--text2); margin-bottom: 12px; }
+    strong { color: var(--text); }
+    em { color: var(--text3); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 18px 22px;
+      margin-bottom: 16px;
+    }
+    .card-accent-blue  { border-left: 3px solid var(--accent); }
+    .card-accent-green { border-left: 3px solid var(--green); }
+    .card-accent-yellow{ border-left: 3px solid var(--yellow); }
+    .card-accent-red   { border-left: 3px solid var(--red); }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: .85em;
+    }
+    thead th {
+      background: var(--bg3);
+      color: var(--text);
+      padding: 8px 14px;
+      text-align: left;
+      font-size: .75em;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 2px solid var(--border2);
+    }
+    tbody td {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      vertical-align: top;
+    }
+    tbody tr:hover td { background: var(--bg3); }
+    td code, th code { font-size: .9em; }
+
+    /* ── Code ── */
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .82em;
+      background: var(--bg4);
+      color: var(--accent);
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--border2);
+    }
+    pre {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+      font-size: .82em;
+      line-height: 1.7;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text);
+      font-size: 1em;
+    }
+    .comment { color: var(--text3); }
+    .kw  { color: var(--accent); }
+    .str { color: var(--green); }
+    .num { color: var(--yellow); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: .72em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-right: 4px;
+    }
+    .badge-blue   { background: rgba(116,168,255,.15); color: var(--accent); border: 1px solid rgba(116,168,255,.3); }
+    .badge-green  { background: rgba(85,217,122,.15);  color: var(--green);  border: 1px solid rgba(85,217,122,.3); }
+    .badge-yellow { background: rgba(232,184,75,.15);  color: var(--yellow); border: 1px solid rgba(232,184,75,.3); }
+    .badge-red    { background: rgba(255,68,68,.15);   color: var(--red);    border: 1px solid rgba(255,68,68,.3); }
+
+    /* ── Callouts ── */
+    .callout {
+      padding: 14px 18px;
+      border-radius: var(--r);
+      margin: 16px 0;
+      font-size: .88em;
+    }
+    .callout-info    { background: rgba(116,168,255,.08); border-left: 3px solid var(--accent); color: var(--text2); }
+    .callout-warning { background: rgba(232,184,75,.08);  border-left: 3px solid var(--yellow); color: var(--text2); }
+    .callout-tip     { background: rgba(85,217,122,.08);  border-left: 3px solid var(--green);  color: var(--text2); }
+
+    /* ── Rudimento colors ── */
+    .rud-poder        { color: #ff4444; }
+    .rud-conhecimento { color: #e8b84b; }
+    .rud-vida         { color: #55d97a; }
+    .rud-prazer       { color: #74a8ff; }
+    .rud-desespero    { color: #b0b8c8; }
+    .rud-justica      { color: #e8e8e8; }
+
+    .rud-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: .78em;
+      font-weight: 700;
+      margin: 2px;
+    }
+
+    /* ── File tree ── */
+    .file-tree {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      font-family: monospace;
+      font-size: .85em;
+      line-height: 2;
+    }
+    .file-tree .folder { color: var(--accent); }
+    .file-tree .file   { color: var(--text2); }
+    .file-tree .note   { color: var(--text3); font-style: italic; }
+
+    /* ── Grid ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border2); margin: 32px 0; }
+
+    /* ── Step list ── */
+    .steps { counter-reset: steps; list-style: none; padding: 0; }
+    .steps li {
+      counter-increment: steps;
+      padding: 12px 16px 12px 56px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      margin-bottom: 8px;
+      position: relative;
+      color: var(--text2);
+      font-size: .9em;
+    }
+    .steps li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background: var(--accent2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .85em;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .toc h3 { color: var(--text); margin: 0 0 12px; font-size: .85em; text-transform: uppercase; letter-spacing: .08em; }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+    .toc a  { color: var(--accent); text-decoration: none; font-size: .85em; }
+    .toc a:hover { text-decoration: underline; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 20px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Instigo</h1>
+      <p>Documentação da Ficha</p>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Introdução</div>
+      <a href="#visao-geral">Visão Geral</a>
+      <a href="#estrutura-arquivos">Estrutura de Arquivos</a>
+      <a href="#como-abrir">Como Abrir</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Sistema de Jogo</div>
+      <a href="#rudimentos">Rudimentos</a>
+      <a href="#atributos">Atributos & Perícias</a>
+      <a href="#pp">Pontos de Progressão (PP)</a>
+      <a href="#progressao">Progressão de Nível</a>
+      <a href="#stats">Stats (PV, PM, TE)</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Abas da Ficha</div>
+      <a href="#aba-personagem">Personagem</a>
+      <a href="#aba-inventario">Inventário</a>
+      <a href="#aba-habilidades">Habilidades</a>
+      <a href="#aba-feiticos">Feitiços</a>
+      <a href="#aba-anotacoes">Anotações</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Ferramentas</div>
+      <a href="#calculadora">Calculadora de Dados</a>
+      <a href="#save-load">Salvar & Carregar</a>
+      <a href="#tema">Tema Visual</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Técnico</div>
+      <a href="#estrutura-js">Estrutura do JS</a>
+      <a href="#dados-estado">Dados & Estado</a>
+      <a href="#css-vars">Variáveis CSS</a>
+      <a href="#adicionar-conteudo">Adicionar Conteúdo</a>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ══ -->
+  <main class="main">
+
+    <h1 class="page-title">Documentação — Ficha Instigo</h1>
+    <p class="page-subtitle">Guia completo para jogadores, mestres e desenvolvedores. Cobre tudo do sistema de jogo ao código interno.</p>
+
+    <div class="toc">
+      <h3>Índice Rápido</h3>
+      <ol>
+        <li><a href="#visao-geral">Visão Geral</a></li>
+        <li><a href="#estrutura-arquivos">Estrutura de Arquivos</a></li>
+        <li><a href="#rudimentos">Rudimentos</a></li>
+        <li><a href="#atributos">Atributos & Perícias</a></li>
+        <li><a href="#pp">Sistema de PP</a></li>
+        <li><a href="#progressao">Progressão de Nível</a></li>
+        <li><a href="#habilidades-sistema">Habilidades</a></li>
+        <li><a href="#feiticos-sistema">Feitiços</a></li>
+        <li><a href="#calculadora">Calculadora de Dados</a></li>
+        <li><a href="#save-load">Salvar & Carregar</a></li>
+        <li><a href="#estrutura-js">Estrutura do JS</a></li>
+        <li><a href="#adicionar-conteudo">Como Adicionar Conteúdo</a></li>
+      </ol>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="visao-geral">Visão Geral</h2>
+
+    <p>A ficha Instigo é uma aplicação web completa para o sistema de RPG proprietário Instigo. Ela roda diretamente no browser, sem necessidade de servidor, instalação ou conexão com internet.</p>
+
+    <div class="grid-2">
+      <div class="card card-accent-blue">
+        <strong>Para Jogadores</strong>
+        <p style="margin-top:8px;font-size:.85em;">Crie seu personagem, distribua pontos, suba de nível, gerencie inventário e role dados — tudo em uma interface só.</p>
+      </div>
+      <div class="card card-accent-green">
+        <strong>Para Desenvolvedores</strong>
+        <p style="margin-top:8px;font-size:.85em;">O sistema é dividido em 3 arquivos (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e pode ser modificado diretamente.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <strong>Dica:</strong> Para usar a ficha, basta colocar os 3 arquivos na mesma pasta e abrir o <code>index.html</code> em qualquer navegador moderno (Chrome, Firefox, Edge).
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="estrutura-arquivos">Estrutura de Arquivos</h2>
+
+    <div class="file-tree">
+      <span class="folder">📁 instigo/</span><br>
+      &nbsp;&nbsp;<span class="file">📄 index.html</span> &nbsp;<span class="note">— estrutura da página (HTML puro, ~760 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">🎨 style.css</span> &nbsp;<span class="note">— todo o visual (~2800 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">⚙️ script.js</span> &nbsp;<span class="note">— toda a lógica (~6900 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ poder.png</span> &nbsp;<span class="note">— imagem de fundo do rudimento Poder</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ conhecimento.png</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ vida.png</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ prazer.png</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ desespero.png</span><br>
+      &nbsp;&nbsp;<span class="file">📄 documentacao.html</span> &nbsp;<span class="note">— este arquivo</span>
+    </div>
+
+    <div class="callout callout-warning">
+      <strong>Atenção:</strong> Os 3 arquivos principais (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e as imagens PNG precisam estar <strong>todos na mesma pasta</strong>. Se separar, a ficha quebra.
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="como-abrir">Como Abrir</h2>
+
+    <ol class="steps">
+      <li>Baixe todos os arquivos para uma pasta no seu computador.</li>
+      <li>Clique duas vezes em <code>index.html</code> — ele abre no seu navegador padrão.</li>
+      <li>Para compartilhar com amigos: suba para o <a href="https://app.netlify.com/drop" style="color:var(--accent)">Netlify Drop</a> arrastando a pasta inteira.</li>
+    </ol>
+
+    <div class="callout callout-info">
+      Os dados do personagem são salvos automaticamente no <strong>localStorage</strong> do browser — isso significa que cada jogador tem sua própria ficha salva no próprio computador ou celular. Para carregar em outro dispositivo, use o botão <strong>Salvar arquivo</strong> para exportar um <code>.json</code>.
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="rudimentos">Rudimentos</h2>
+
+    <p>Rudimentos são as "classes" do sistema Instigo. Cada personagem conecta um <strong>Rudimento Primário</strong> e opcionalmente um <strong>Rudimento Secundário</strong>. Os rudimentos definem o tema visual da ficha, os bônus de nível e as habilidades disponíveis.</p>
+
+    <table>
+      <thead>
+        <tr><th>Rudimento</th><th>Cor</th><th>Tema visual</th><th>Imagem de fundo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="rud-poder">Poder</span></td><td>Vermelho <code>#ff4444</code></td><td>Agressivo, intenso</td><td><code>poder.png</code></td></tr>
+        <tr><td><span class="rud-conhecimento">Conhecimento</span></td><td>Dourado <code>#e8b84b</code></td><td>Sábio, dourado</td><td><code>conhecimento.png</code></td></tr>
+        <tr><td><span class="rud-vida">Vida</span></td><td>Verde <code>#55d97a</code></td><td>Natural, vibrante</td><td><code>vida.png</code></td></tr>
+        <tr><td><span class="rud-prazer">Prazer</span></td><td>Azul claro <code>#74a8ff</code></td><td>Sereno, aéreo</td><td><code>prazer.png</code></td></tr>
+        <tr><td><span class="rud-desespero">Desespero</span></td><td>Prata <code>#b0b8c8</code></td><td>Escuro, sombrio</td><td><code>desespero.png</code></td></tr>
+        <tr><td><span class="rud-justica">Justiça</span></td><td>Branco <code>#e8e8e8</code></td><td>Neutro, claro</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Como o tema muda</h3>
+    <p>Quando o jogador seleciona um rudimento, a função <code>aplicarTemaRudimentos()</code> no <code>script.js</code> modifica as variáveis CSS <code>--rud-prim</code>, <code>--accent</code>, <code>--bg</code> etc. em tempo real, tingindo toda a interface na cor do rudimento.</p>
+
+    <p>Com dois rudimentos conectados, as imagens de fundo <strong>alternam a cada 5 segundos</strong> com um fade cruzado suave.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="atributos">Atributos & Perícias</h2>
+
+    <div class="callout callout-info">
+      <strong>Importante:</strong> Os atributos têm dois nomes. O nome na ficha (visível ao jogador) é o nome antigo do sistema. O nome do rudimento é o nome novo usado na progressão e habilidades. Eles são a mesma coisa, só com nomes diferentes em contextos diferentes.
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Nome na ficha</th><th>Nome do rudimento</th><th>Cor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Combate</td><td><span class="rud-poder">Poder</span></td><td><code>--c-poder</code></td></tr>
+        <tr><td>Mental</td><td><span class="rud-conhecimento">Conhecimento</span></td><td><code>--c-conhecimento</code></td></tr>
+        <tr><td>Psicológico</td><td><span class="rud-desespero">Desespero</span></td><td><code>--c-desespero</code></td></tr>
+        <tr><td>Físico</td><td><span class="rud-vida">Vida</span></td><td><code>--c-vida</code></td></tr>
+        <tr><td>Perspicácia</td><td><span class="rud-prazer">Prazer</span></td><td><code>--c-prazer</code></td></tr>
+        <tr><td>Dedicação</td><td><span class="rud-justica">Justiça</span></td><td><code>--c-justica</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Como funcionam os atributos</h3>
+    <p>Cada atributo começa em 1 e pode ir até 5. Os pontos são distribuídos via drag-and-drop — o jogador arrasta para reordenar do mais alto para o mais baixo. O sistema calcula automaticamente o valor de cada atributo com base na posição no ranking.</p>
+
+    <h3>Perícias</h3>
+    <p>Cada atributo tem um conjunto de perícias. O número de pontos disponíveis em cada atributo depende do valor do atributo. Os pontos de perícia podem ser distribuídos livremente entre as perícias do atributo.</p>
+
+    <pre><code><span class="comment">// Exemplo: perícias do atributo Poder (Combate)</span>
+PERICIAS_POR_ATRIBUTO["Poder"] = [
+  "Atletismo", "Corpo a Corpo", "Armas Brancas",
+  "Armas de Fogo", "Armas de Longo Alcance",
+  "Carregar/Levantar Peso"
+]</code></pre>
+
+    <h4>Subperícas</h4>
+    <p>Algumas perícias têm subperícas fixas (definidas no sistema) ou livres (o jogador cria). Cada subperícia pode receber uma especialização:</p>
+    <table>
+      <thead><tr><th>Especialização</th><th>Bônus</th><th>Limite</th></tr></thead>
+      <tbody>
+        <tr><td>Muito Bom (MB)</td><td>+5</td><td>3 no total</td></tr>
+        <tr><td>Bom (B)</td><td>+3</td><td>7 no total</td></tr>
+        <tr><td>Ruim (R)</td><td>−3</td><td>3 no total</td></tr>
+        <tr><td>Muito Ruim (MR)</td><td>−5</td><td>2 no total</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="pp">Pontos de Progressão (PP)</h2>
+
+    <p>PP são a "moeda" do sistema. Existem três pools distintos:</p>
+
+    <div class="card card-accent-blue">
+      <h4 style="margin-top:0">1. PP de Nível 1 (livres por atributo)</h4>
+      <p>Pontos iniciais distribuídos no criação do personagem. Cada atributo tem um máximo baseado no seu valor. Podem ir para perícias <em>ou</em> diretamente para habilidades/feitiços.</p>
+      <code>ppLivresAtrib(atrib)</code> — calcula o saldo disponível
+    </div>
+
+    <div class="card card-accent-yellow">
+      <h4 style="margin-top:0">2. PP de Progressão (por perícia)</h4>
+      <p>Ganhos ao subir de nível e distribuídos para perícias específicas. Ficam "presos" na perícia escolhida e aumentam seu teto máximo.</p>
+      <code>ppProgressao["Atletismo"] = 3</code> — 3 PP de progressão em Atletismo
+    </div>
+
+    <div class="card card-accent-green">
+      <h4 style="margin-top:0">3. Pool de Upagem (ppUpagemPool)</h4>
+      <p>PP recebidos ao subir de nível que ainda <em>não foram distribuídos</em>. Podem ir para perícias <em>ou</em> diretamente para habilidades/feitiços. São os mais flexíveis.</p>
+      <code>ppUpagemPool = 24</code> — 24 PP de upagem disponíveis<br>
+      <code>ppUpagemDisponivel()</code> — calcula o saldo livre
+    </div>
+
+    <h3>Fontes de PP nas Habilidades e Feitiços</h3>
+    <p>Ao adquirir uma habilidade ou feitiço, o jogador precisa declarar de onde vêm os PP. Há três opções:</p>
+
+    <table>
+      <thead><tr><th>Tipo de fonte</th><th>Valor no código</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>PP de Upagem</td><td><code>tipo: "upagem"</code></td><td>Do pool de upagem livre</td></tr>
+        <tr><td>PP Livres do atributo</td><td><code>tipo: "livre", atrib: "Poder"</code></td><td>Do pool de nível 1 não usado</td></tr>
+        <tr><td>PP de Perícia</td><td><code>tipo: "pericia", pericia: "Atletismo"</code></td><td>De uma perícia específica</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="progressao">Progressão de Nível</h2>
+
+    <p>O progresso funciona assim: o jogador clica em <strong>Upar</strong> após o nível 1 ser salvo. Um popup aparece com as escolhas do nível.</p>
+
+    <h3>Bônus automáticos por nível</h3>
+    <table>
+      <thead><tr><th>Stat</th><th>Bônus por nível</th><th>Exceção</th></tr></thead>
+      <tbody>
+        <tr><td>PV</td><td>+3</td><td>—</td></tr>
+        <tr><td>PM</td><td>+3</td><td>—</td></tr>
+        <tr><td>TE</td><td>+5</td><td>Desespero não ganha TE</td></tr>
+        <tr><td>PP de Upagem</td><td>+12</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Escolhas obrigatórias (nível 3 e todo nível ≥ 5)</h3>
+    <p>O jogador precisa escolher uma das opções:</p>
+    <ul style="padding-left:20px;color:var(--text2);font-size:.9em;line-height:2;">
+      <li>1 Habilidade Tipo 0 do Rudimento Conectado sem custo</li>
+      <li>+10 PF + 1 PA de um Rudimento não Conectado</li>
+      <li>1 Vantagem em testes do Atributo do Rudimento (máx 1 a cada 5 níveis)</li>
+      <li>+5 no limite das Perícias — aquisição única (exceto Justiça)</li>
+      <li>1 Feitiço do Rudimento Conectado sem custo</li>
+    </ul>
+
+    <h3>PF — Pontos de Ficha</h3>
+    <p>PF são pontos ganhos por escolhas de nível que podem ser distribuídos livremente entre PV, PM, TE ou PP adicionais. Diferente dos bônus automáticos, o jogador decide onde colocar.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="stats">Stats: PV, PM e TE</h2>
+
+    <p>Os três stats principais aparecem como barras coloridas na ficha:</p>
+
+    <table>
+      <thead><tr><th>Stat</th><th>Cor</th><th>Significado</th><th>Base calculada por</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:#55d97a">Pontos de Vida (PV)</strong></td><td>Verde</td><td>Saúde do personagem</td><td>½(Força + Resistência) + bônus</td></tr>
+        <tr><td><strong style="color:#e8b84b">Pontos de Maestria (PM)</strong></td><td>Dourado</td><td>Energia para usar habilidades</td><td>Magia + bônus</td></tr>
+        <tr><td><strong style="color:#74a8ff">Tolerância de Estresse (TE)</strong></td><td>Azul</td><td>Resistência psicológica</td><td>Determinação − Ocultismo + Conforto</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Controles de combate</h3>
+    <p>Cada barra tem controles para o jogador registrar eventos sem fazer conta:</p>
+    <ul style="padding-left:20px;color:var(--text2);font-size:.9em;line-height:2;">
+      <li><strong>PV:</strong> campo numérico + botão <em>Dano</em> (subtrai) / <em>Cura</em> (soma)</li>
+      <li><strong>PM:</strong> botão <em>Gastar</em> / <em>Recuperar</em></li>
+      <li><strong>TE:</strong> botão <em>Acumular</em> / <em>Aliviar</em></li>
+      <li>Botão <code>✎</code> — permite editar o valor máximo manualmente</li>
+    </ul>
+
+    <div class="callout callout-warning">
+      Quando o PV ou TE cai abaixo de 25% do máximo, a barra começa a piscar como alerta visual.
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="aba-personagem">Aba: Personagem</h2>
+
+    <p>A aba principal contém:</p>
+    <ul style="padding-left:20px;color:var(--text2);font-size:.9em;line-height:2.2;">
+      <li><strong>Topo integrado:</strong> seleção de rudimentos, nível, botão Upar, arquétipos, PF e bônus acumulados</li>
+      <li><strong>Informações pessoais:</strong> nome, ocupação, idade, foto</li>
+      <li><strong>Stats rápidos:</strong> Defesa, PD Atenção, PD Vida</li>
+      <li><strong>Barras de PV/PM/TE</strong> com controles de combate</li>
+      <li><strong>Configurações de campanha:</strong> ação de conforto, base de TE/PM, campanha longa</li>
+      <li><strong>Atributos:</strong> ranking drag-and-drop com 6 atributos</li>
+      <li><strong>Perícias:</strong> grupos por atributo com controles de PP</li>
+    </ul>
+
+    <h3>Salvar Nível 1</h3>
+    <p>Antes de começar a progressão, o jogador deve clicar em <strong>Salvar Nível 1</strong>. Isso tira um snapshot (<code>snapshotN1</code>) dos valores base, que serve de referência para todos os cálculos de bônus de nível.</p>
+
+    <div class="callout callout-warning">
+      <strong>Importante:</strong> Se o jogador mudar os atributos ou perícias depois de salvar o nível 1 e usar o botão de re-salvar, os cálculos de PV/PM/TE serão recalculados a partir dos novos valores.
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="aba-inventario">Aba: Inventário</h2>
+
+    <p>Dividido em duas seções:</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="margin-top:0">Itens Gerais</h4>
+        <p>Qualquer objeto. Campos: <em>nome</em>, <em>quantidade</em>, <em>descrição</em>.</p>
+        <code>inventario = [{id, nome, qtd, desc}]</code>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0">Armas</h4>
+        <p>Armas aparecem também no select de dano da calculadora. Campos: <em>nome</em>, <em>bônus de acerto</em>, <em>dados de dano</em> (vários), <em>alcance</em>, <em>munição</em>, <em>especificação</em>.</p>
+        <code>armas = [{id, nome, acerto, dados, alcance, municao, espec}]</code>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="aba-habilidades">Aba: Habilidades</h2>
+
+    <h3 id="habilidades-sistema">Como funciona</h3>
+    <p>Habilidades são poderes especiais adquiridos com PP. Existem três tipos:</p>
+
+    <table>
+      <thead><tr><th>Tipo</th><th>Custo</th><th>Disponibilidade</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-blue">Tipo 0</span></td><td>5 PP</td><td>Sempre disponível para qualquer rudimento</td></tr>
+        <tr><td><span class="badge badge-yellow">Tipo I</span></td><td>8 PP</td><td>Depende do Rudimento e Arquétipo conectados</td></tr>
+        <tr><td><span class="badge badge-red">Tipo II</span></td><td>12 PP</td><td>Depende do Rudimento e Arquétipo conectados</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Catálogo de Habilidades</h3>
+    <p>O catálogo mostra todas as habilidades disponíveis organizadas por <strong>Rudimento → Arquétipo → Tipo</strong>. Ao selecionar uma do catálogo, o nome e a descrição são preenchidos automaticamente no formulário.</p>
+
+    <h3>Adquirindo uma habilidade</h3>
+    <ol class="steps">
+      <li>Selecione uma habilidade do catálogo <em>ou</em> preencha manualmente o nome e descrição.</li>
+      <li>Escolha o tipo (0, I ou II) — o custo em PP é calculado automaticamente.</li>
+      <li>Defina de onde vêm os PP: PP de Upagem, PP Livres de um atributo, ou de uma Perícia.</li>
+      <li>Clique em <strong>Confirmar Habilidade</strong>.</li>
+    </ol>
+
+    <h3>Efeitos automáticos</h3>
+    <p>Algumas habilidades do catálogo têm efeitos que se aplicam automaticamente à ficha (ex: +1 Defesa, bônus em subperícas específicas). Quando isso acontece, um aviso em verde confirma a aplicação.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="aba-feiticos">Aba: Feitiços</h2>
+
+    <h3 id="feiticos-sistema">Como funciona</h3>
+    <p>Feitiços são poderes mágicos. Cada feitiço tem campos específicos e um custo em PP.</p>
+
+    <table>
+      <thead><tr><th>Campo</th><th>Descrição</th></tr></thead>
+      <tbody>
+        <tr><td>Nome</td><td>Nome do feitiço</td></tr>
+        <tr><td>Rudimento</td><td>Qual rudimento o feitiço pertence (Poder, Conhecimento, etc.)</td></tr>
+        <tr><td>Tipo</td><td>Classificação livre (ataque, suporte, ritual...)</td></tr>
+        <tr><td>Alcance</td><td>Alcance de efeito</td></tr>
+        <tr><td>Custo PM</td><td>Pontos de Maestria gastos ao usar</td></tr>
+        <tr><td>Duração</td><td>Por quanto tempo o efeito dura</td></tr>
+        <tr><td>Dados</td><td>Dados de dano/efeito (ex: 2d6, 1d8)</td></tr>
+        <tr><td>Descrição</td><td>Como o feitiço funciona</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Feitiço sem custo</h3>
+    <p>Marcando a opção <strong>"Sem custo de PP"</strong>, o feitiço é salvo gratuitamente — útil para feitiços narrativos, de progressão ou concedidos pelo mestre.</p>
+
+    <h3>Organização</h3>
+    <p>Os feitiços são organizados por rudimento em tabs na parte superior da aba. A tab "Todos" mostra todos juntos.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="aba-anotacoes">Aba: Anotações</h2>
+
+    <p>Área livre para o jogador anotar qualquer coisa sobre a campanha — resumos de sessão, NPCs, segredos descobertos, etc.</p>
+
+    <p>Organizado em <strong>abas</strong> (clique em <code>+ Aba</code> para criar uma nova). Cada aba tem um título editável e um campo de texto livre. As anotações são salvas automaticamente no localStorage.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="calculadora">Calculadora de Dados</h2>
+
+    <p>Acessível pelo botão 🎲 no canto inferior direito. Tem duas abas:</p>
+
+    <div class="grid-2">
+      <div class="card card-accent-blue">
+        <h4 style="margin-top:0">Aba Teste</h4>
+        <p>Para testes de perícia. Selecione: <em>atributo → perícia → subperícia → especialização</em>. Adicione modificadores, vantagem/desvantagem e bônus de habilidades.</p>
+      </div>
+      <div class="card card-accent-yellow">
+        <h4 style="margin-top:0">Aba Dano / Efeito</h4>
+        <p>Para rolagens de dano. Selecione uma arma do inventário ou configure os dados manualmente. O dado bônus de Poder é adicionado automaticamente.</p>
+      </div>
+    </div>
+
+    <h3>Modo Fixado (⊞)</h3>
+    <p>Clique no botão <code>⊞</code> no cabeçalho da calculadora para fixá-la como um painel lateral direito. A ficha se ajusta automaticamente para não ficar escondida. Perfeito para usar durante o jogo sem fechar a calculadora.</p>
+
+    <h3>Histórico</h3>
+    <p>As últimas 15 rolagens ficam salvas no histórico. Resultados especiais são marcados: <strong>💀</strong> Falha Crítica (1 natural) e <strong>✨</strong> Sucesso Crítico (20 natural).</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="save-load">Salvar & Carregar</h2>
+
+    <p>O sistema de save funciona em duas camadas:</p>
+
+    <div class="card card-accent-green">
+      <h4 style="margin-top:0">Auto-save (localStorage)</h4>
+      <p>Toda mudança na ficha dispara um timer de 2 segundos. Após o timer, o estado completo é serializado em JSON e salvo no localStorage do browser. O status "Salvo automaticamente às HH:MM" aparece no topo.</p>
+      <p>O auto-save é <em>por browser</em> — cada computador/celular tem seu próprio save. Para transferir, use o export.</p>
+    </div>
+
+    <div class="card card-accent-blue">
+      <h4 style="margin-top:0">Export / Import (.json)</h4>
+      <p><strong>Salvar arquivo:</strong> na primeira vez, pede o nome do personagem. Gera um arquivo <code>NomePersonagem.json</code> para download.</p>
+      <p><strong>Carregar ficha:</strong> seleciona um <code>.json</code> exportado anteriormente e restaura todo o estado da ficha.</p>
+    </div>
+
+    <div class="card card-accent-red">
+      <h4 style="margin-top:0">Resetar ficha</h4>
+      <p>Limpa <em>todos</em> os dados (localStorage e estado em memória) e recarrega a página do zero. Pede confirmação com descrição completa do que será apagado.</p>
+    </div>
+
+    <h3>O que é salvo</h3>
+    <p>O JSON exportado contém: atributos, perícias, PP, pools de upagem, stats (PV/PM/TE atual e máximo), progressão de nível, escolhas, habilidades, feitiços, inventário, armas e anotações.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="tema">Tema Visual</h2>
+
+    <p>O tema muda automaticamente baseado no rudimento primário conectado. O rudimento secundário afeta as cores de detalhe (h2, h3, bordas).</p>
+
+    <h3>Imagens de fundo</h3>
+    <p>Cada rudimento tem uma imagem de fundo que aparece pulsando com blend mode <code>screen</code> sobre o fundo escuro. Quando dois rudimentos estão conectados, as imagens alternam a cada 5 segundos.</p>
+
+    <p>Para trocar as imagens: substitua os arquivos PNG na pasta com os mesmos nomes (<code>poder.png</code>, <code>conhecimento.png</code>, etc.). O código em <code>script.js</code> no objeto <code>BG_IMAGENS</code> referencia os nomes dos arquivos.</p>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="estrutura-js">Estrutura do script.js</h2>
+
+    <p>O arquivo está organizado em seções bem delimitadas por comentários. Aqui está a ordem:</p>
+
+    <table>
+      <thead><tr><th>Seção</th><th>Linhas ~</th><th>Conteúdo</th></tr></thead>
+      <tbody>
+        <tr><td>Tema e cores</td><td>1–115</td><td><code>ATRIB_COLORS</code>, <code>aplicarTemaRudimentos()</code>, <code>blendColor()</code></td></tr>
+        <tr><td>Atributos e exibição</td><td>115–165</td><td><code>ATRIBUTOS</code>, <code>ATRIB_DISPLAY</code>, <code>PERICIAS_POR_ATRIBUTO</code></td></tr>
+        <tr><td>Subperícas e especializações</td><td>166–530</td><td>Lógica de MB/B/R/MR, subperícas fixas e livres</td></tr>
+        <tr><td>Cálculos de ficha</td><td>530–860</td><td>PV, PM, TE, Defesa, Conforto, ranking</td></tr>
+        <tr><td>Atributos (drag & drop)</td><td>633–795</td><td>Ordenação visual dos blocos</td></tr>
+        <tr><td>PP e perícias</td><td>795–1090</td><td>Distribuição de pontos, limites, progressão</td></tr>
+        <tr><td>UI principal (<code>atualizarUI</code>)</td><td>1089–1260</td><td>Re-renderiza toda a interface</td></tr>
+        <tr><td>Calculadora de dados</td><td>1260–1750</td><td>Modal, rolagens, histórico, pin</td></tr>
+        <tr><td>Progressão de nível</td><td>1749–2125</td><td><code>progState</code>, popup de upagem, bônus</td></tr>
+        <tr><td>Catálogo de habilidades</td><td>1773–2125</td><td>Toda a base de habilidades do sistema</td></tr>
+        <tr><td>Habilidades</td><td>2125–2450</td><td>Form, fontes de PP, confirmar, efeitos</td></tr>
+        <tr><td>Feitiços</td><td>2450–2750</td><td>Modal, dados, fontes, salvar, remover</td></tr>
+        <tr><td>Inventário</td><td>2750–2900</td><td>Itens e armas</td></tr>
+        <tr><td>RENDER INICIAL</td><td>4666–5135</td><td>Constrói o DOM no carregamento da página</td></tr>
+        <tr><td>Catálogo browser</td><td>5035–5135</td><td>Renderiza o catálogo de habilidades</td></tr>
+        <tr><td>Background animado</td><td>6188–6380</td><td>Sistema de imagens de fundo</td></tr>
+        <tr><td>Save/Load</td><td>6380–6900</td><td>LocalStorage, export JSON, import</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="dados-estado">Dados & Estado Global</h2>
+
+    <p>Todo o estado do personagem vive em variáveis globais no topo do <code>script.js</code>. Aqui estão as principais:</p>
+
+    <pre><code><span class="comment">// Valores dos 6 atributos (1–5)</span>
+<span class="kw">const</span> atributos = { Poder: 1, Conhecimento: 1, Desespero: 1, Vida: 1, Prazer: 1, Justiça: 1 };
+
+<span class="comment">// PP base distribuídos em cada perícia no nível 1</span>
+<span class="kw">const</span> pericias = {}; <span class="comment">// ex: { "Atletismo": 3 }</span>
+
+<span class="comment">// PP ganhos via upagem e distribuídos a perícias</span>
+<span class="kw">const</span> ppProgressao = {}; <span class="comment">// ex: { "Atletismo": 5 }</span>
+
+<span class="comment">// PP de upagem ainda não distribuídos (pool livre)</span>
+<span class="kw">let</span> ppUpagemPool = <span class="num">0</span>;
+
+<span class="comment">// PP gastos em habilidades por perícia</span>
+<span class="kw">const</span> ppGastoHabilidades = {};
+<span class="kw">const</span> ppGastoHabilidadesProg = {};
+
+<span class="comment">// Estado de progressão</span>
+<span class="kw">const</span> progState = {
+  primario: <span class="str">""</span>,         <span class="comment">// rudimento primário</span>
+  secundario: <span class="str">""</span>,       <span class="comment">// rudimento secundário</span>
+  nivelPrimario: <span class="num">1</span>,
+  nivelSecundario: <span class="num">1</span>,
+  escolhas: { prim: [], sec: [] },
+  pfPV: <span class="num">0</span>, pfPM: <span class="num">0</span>, pfTE: <span class="num">0</span>, pfPP: <span class="num">0</span>,
+};
+
+<span class="comment">// Snapshot dos valores no nível 1 (base para cálculos)</span>
+<span class="kw">let</span> snapshotN1 = <span class="kw">null</span>;
+
+<span class="comment">// Habilidades adquiridas</span>
+<span class="kw">const</span> habilidades = []; <span class="comment">// [{id, nome, tipo, fontes, atrib, desc}]</span>
+
+<span class="comment">// Feitiços</span>
+<span class="kw">const</span> feiticos = [];   <span class="comment">// [{id, nome, rudimento, tipo, alcance, pm, duracao, dados, desc, gratis, fontes}]</span>
+
+<span class="comment">// Inventário</span>
+<span class="kw">const</span> inventario = []; <span class="comment">// [{id, nome, qtd, desc}]</span>
+<span class="kw">const</span> armas = [];      <span class="comment">// [{id, nome, acerto, dados, alcance, municao, espec}]</span>
+</code></pre>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="css-vars">Variáveis CSS Principais</h2>
+
+    <p>Todas as cores e espaçamentos usam variáveis CSS definidas no <code>:root</code> do <code>style.css</code>. As principais:</p>
+
+    <table>
+      <thead><tr><th>Variável</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td><code>--rud-prim</code></td><td>Cor principal do rudimento primário (muda dinamicamente)</td></tr>
+        <tr><td><code>--rud-prim-dark</code></td><td>Tom escuro do rudimento primário</td></tr>
+        <tr><td><code>--rud-sec</code></td><td>Cor do rudimento secundário</td></tr>
+        <tr><td><code>--accent</code></td><td>Cor de destaque geral (= <code>--rud-prim</code>)</td></tr>
+        <tr><td><code>--bg</code> → <code>--bg4</code></td><td>Tons de fundo, do mais escuro ao mais claro</td></tr>
+        <tr><td><code>--text</code> → <code>--text3</code></td><td>Tons de texto, do mais claro ao mais discreto</td></tr>
+        <tr><td><code>--c-poder</code></td><td>Vermelho fixo do rudimento Poder</td></tr>
+        <tr><td><code>--c-conhecimento</code></td><td>Dourado fixo do rudimento Conhecimento</td></tr>
+        <tr><td><code>--c-vida</code></td><td>Verde fixo do rudimento Vida</td></tr>
+        <tr><td><code>--c-prazer</code></td><td>Azul fixo do rudimento Prazer</td></tr>
+        <tr><td><code>--c-desespero</code></td><td>Prata fixo do rudimento Desespero</td></tr>
+        <tr><td><code>--c-justica</code></td><td>Branco fixo do rudimento Justiça</td></tr>
+        <tr><td><code>--r</code>, <code>--r2</code></td><td>Border-radius padrão (6px e 10px)</td></tr>
+        <tr><td><code>--green</code>, <code>--red</code>, <code>--yellow</code></td><td>Cores de feedback</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <h2 id="adicionar-conteudo">Como Adicionar Conteúdo</h2>
+
+    <h3>Adicionar uma nova habilidade ao catálogo</h3>
+    <p>No <code>script.js</code>, procure o objeto <code>CATALOGO_HABILIDADES</code>. A estrutura é:</p>
+
+    <pre><code>CATALOGO_HABILIDADES[<span class="str">"NomeDoRudimento"</span>][<span class="str">"NomeDoArquétipo"</span>][<span class="str">"0"</span>] = [
+  { nome: <span class="str">"NOME DA HABILIDADE:"</span>, descricao: <span class="str">"Descrição completa..."</span> },
+  <span class="comment">// "0" = Tipo 0 (5PP), "1" = Tipo I (8PP), "2" = Tipo II (12PP)</span>
+];</code></pre>
+
+    <div class="callout callout-tip">
+      <strong>Dica:</strong> Os nomes das habilidades no catálogo devem estar em maiúsculas seguidas de dois pontos, ex: <code>"GOLPE PRECISO:"</code>. Isso é uma convenção do sistema para distinguir o nome da descrição.
+    </div>
+
+    <h3>Adicionar um novo arquétipo</h3>
+    <p>Procure o objeto <code>TODOS_ARQUETIPOS</code> no <code>script.js</code> e adicione:</p>
+    <pre><code><span class="str">"NomeDoArquétipo"</span>: <span class="str">"NomeDoRudimento"</span>,</code></pre>
+
+    <p>Depois adicione as habilidades dele em <code>CATALOGO_HABILIDADES["Rudimento"]["Arquétipo"]</code>.</p>
+
+    <h3>Adicionar uma nova perícia</h3>
+    <p>No <code>script.js</code>, no objeto <code>PERICIAS_POR_ATRIBUTO</code>:</p>
+    <pre><code>PERICIAS_POR_ATRIBUTO[<span class="str">"Poder"</span>].push(<span class="str">"Nova Perícia"</span>);</code></pre>
+
+    <p>Se a perícia tiver subperícas fixas, adicione também no objeto <code>SUBPERICIAS_FIXAS</code>.</p>
+
+    <h3>Trocar as imagens de fundo</h3>
+    <p>Substitua os arquivos PNG na pasta pelos seus. O tamanho recomendado é pelo menos 800×800px, fundo preto (o modo screen elimina o preto automaticamente). Nomes dos arquivos:</p>
+    <pre><code>poder.png, conhecimento.png, vida.png, prazer.png, desespero.png</code></pre>
+
+    <h3>Mudar o nome do sistema</h3>
+    <p>Procure e substitua no <code>index.html</code>:</p>
+    <pre><code><span class="comment">&lt;!-- Linha 6 --&gt;</span>
+&lt;title&gt;Instigo&lt;/title&gt;
+
+<span class="comment">&lt;!-- Linha 1864 --&gt;</span>
+&lt;h1&gt;Instigo&lt;/h1&gt;</code></pre>
+
+    <hr>
+
+    <div class="callout callout-info" style="text-align:center;">
+      <strong>Dúvidas ou problemas?</strong> Consulte os comentários no código — cada seção tem um bloco de comentário explicativo no início.
+    </div>
+
+    <p style="text-align:center;color:var(--text3);font-size:.78em;margin-top:40px;">
+      Documentação gerada para a Ficha Instigo · Sistema de RPG Proprietário
+    </p>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('h2[id], h3[id]');
+  const links    = document.querySelectorAll('.sidebar a');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
