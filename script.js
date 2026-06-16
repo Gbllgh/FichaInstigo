@@ -285,7 +285,7 @@ const ESPEC_CONFIG = {
   "mb": { label:"Muito Bom", mod:+5, limite:3, classe:"val-mb" },
   "b":  { label:"Bom",       mod:+3, limite:7, classe:"val-b"  },
   "":   { label:"—",         mod: 0, limite:Infinity, classe:"" },
-  "r":  { label:"Ruim",      mod:-3, limite:3, classe:"val-r"  },
+  "r":  { label:"Ruim",      mod:-3, limite:4, classe:"val-r"  },
   "mr": { label:"Muito Ruim",mod:-5, limite:2, classe:"val-mr" }
 };
 
