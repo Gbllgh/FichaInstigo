@@ -235,6 +235,7 @@
           <span class="topo-nivel-label">Nv</span>
           <input type="number" id="rud-primario-nivel" min="1" value="1" class="topo-nivel-input" readonly>
           <button type="button" onclick="abrirPopupNivel('prim')" id="btn-upar-prim" class="topo-upar-btn" style="display:none;">Upar</button>
+          <button type="button" onclick="desfazerNivel('prim')" id="btn-desfazer-prim" class="topo-desfazer-btn" style="display:none;" title="Desfaz o último nível upado e remove tudo que ele entregou">↶ Desfazer Nível</button>
         </div>
         <span class="topo-xp-label">XP próx: <b id="rud-xp-prim">—</b></span>
         <div id="rud-forma-badge-prim" class="rud-forma-badge" style="display:none;">Forma Secundária desbloqueada</div>
@@ -257,6 +258,7 @@
           <span class="topo-nivel-label">Nv</span>
           <input type="number" id="rud-secundario-nivel" min="1" value="1" class="topo-nivel-input" readonly>
           <button type="button" onclick="abrirPopupNivel('sec')" id="btn-upar-sec" class="topo-upar-btn" style="display:none;">Upar</button>
+          <button type="button" onclick="desfazerNivel('sec')" id="btn-desfazer-sec" class="topo-desfazer-btn" style="display:none;" title="Desfaz o último nível upado e remove tudo que ele entregou">↶ Desfazer Nível</button>
         </div>
         <span class="topo-xp-label">XP próx: <b id="rud-xp-sec">—</b></span>
         <div id="rud-forma-badge-sec" class="rud-forma-badge" style="display:none;">Forma Secundária desbloqueada</div>
@@ -736,6 +738,13 @@
 <div class="upar-overlay" id="upar-overlay" onclick="if(event.target===this)fecharPopupNivel()">
   <div class="upar-modal" id="upar-modal-content">
     <!-- preenchido por abrirPopupNivel() -->
+  </div>
+</div>
+
+<!-- ══ POPUP ALINHADO PELO MEIO ══ -->
+<div class="upar-overlay" id="alinhado-overlay" style="z-index:800;">
+  <div class="upar-modal" id="alinhado-modal-content" style="max-width:480px;">
+    <!-- preenchido por habAlinhadoAbrirPopup() -->
   </div>
 </div>
   <script src="script.js"></script>

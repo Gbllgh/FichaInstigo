@@ -843,6 +843,14 @@ button[onclick*="armaRemoverDado"], button[onclick*="invRemover"] {
 .espec-modificador { font-size: .78em; font-weight: 700; min-width: 28px; }
 .mod-pos { color: var(--green); }
 .mod-neg { color: var(--red); }
+.pericia-total {
+  margin-left: auto;
+  font-size: .95em;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 28px;
+  text-align: right;
+}
 
 /* Subperícas livres */
 .sub-livre-bloco { padding: 6px 12px 6px 28px; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -1581,13 +1589,24 @@ h1 {
 .info-pp-pool b { color: var(--rud-prim) !important; }
 
 /* Escolha confirmada */
+.upar-overlay.rud-prim .escolha-feita { border-left-color: var(--rud-prim) !important; background: var(--rud-prim-dark) !important; color: var(--rud-prim) !important; }
+.upar-overlay.rud-sec  .escolha-feita { border-left-color: var(--rud-sec)  !important; background: var(--rud-sec-dark)  !important; color: var(--rud-sec)  !important; }
+/* Fora do popup de upagem (ex: lista de escolhas já feitas no topo), mantém a cor do primário por padrão */
 .escolha-feita { border-left-color: var(--rud-prim) !important; background: var(--rud-prim-dark) !important; color: var(--rud-prim) !important; }
 
-/* Upar modal: cor primária */
-.upar-header h3 { color: var(--rud-prim) !important; text-shadow: 0 0 10px var(--rud-prim-glow) !important; }
-.upar-btn-confirmar { background: var(--rud-prim-dark) !important; color: var(--rud-prim) !important; border-color: var(--rud-prim) !important; }
-.upar-btn-confirmar:hover:not(:disabled) { background: var(--rud-prim-mid) !important; }
-.upar-bonus-item { border-color: var(--rud-prim-mid) !important; color: var(--text2); }
+/* Upar modal: cor reflete o rudimento que está sendo upado (primário ou secundário) */
+.upar-overlay.rud-prim .upar-header h3 { color: var(--rud-prim) !important; text-shadow: 0 0 10px var(--rud-prim-glow) !important; }
+.upar-overlay.rud-sec  .upar-header h3 { color: var(--rud-sec)  !important; text-shadow: 0 0 10px var(--rud-sec-glow)  !important; }
+.upar-overlay.rud-prim .upar-btn-confirmar { background: var(--rud-prim-dark) !important; color: var(--rud-prim) !important; border-color: var(--rud-prim) !important; }
+.upar-overlay.rud-sec  .upar-btn-confirmar { background: var(--rud-sec-dark)  !important; color: var(--rud-sec)  !important; border-color: var(--rud-sec)  !important; }
+.upar-overlay.rud-prim .upar-btn-confirmar:hover:not(:disabled) { background: var(--rud-prim-mid) !important; }
+.upar-overlay.rud-sec  .upar-btn-confirmar:hover:not(:disabled) { background: var(--rud-sec-mid)  !important; }
+.upar-overlay.rud-prim .upar-bonus-item { border-color: var(--rud-prim-mid) !important; color: var(--text2); }
+.upar-overlay.rud-sec  .upar-bonus-item { border-color: var(--rud-sec-mid)  !important; color: var(--text2); }
+.upar-overlay.rud-prim .upar-secao.escolha { background: var(--rud-prim-dark) !important; border: 1px solid var(--rud-prim-mid) !important; }
+.upar-overlay.rud-sec  .upar-secao.escolha { background: var(--rud-sec-dark)  !important; border: 1px solid var(--rud-sec-mid)  !important; }
+.upar-overlay.rud-prim .upar-secao.escolha .upar-secao-titulo { color: var(--rud-prim) !important; }
+.upar-overlay.rud-sec  .upar-secao.escolha .upar-secao-titulo { color: var(--rud-sec)  !important; }
 
 /* ═══════════════════════════════════════════════════════
    HABILIDADES — Cards ricos por atributo
@@ -2228,6 +2247,17 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--r);
 }
 .topo-upar-btn:hover { background: var(--accent); }
+.topo-desfazer-btn {
+  padding: 3px 8px;
+  font-size: .75em;
+  font-weight: 700;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--r);
+  opacity: .75;
+}
+.topo-desfazer-btn:hover { background: var(--red); color: #fff; opacity: 1; }
 .topo-xp-label {
   font-size: .72em;
   color: var(--text3);

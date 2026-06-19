@@ -390,7 +390,8 @@ function contarEspecTotal(tipo) {
 function podeEscolherEspec(tipo, espAtual) {
   if (tipo === "") return true;
   if (espAtual === tipo) return true; // já tem esse, não ocupa novo slot
-  return contarEspecTotal(tipo) < ESPEC_CONFIG[tipo].limite;
+  const limite = ESPEC_CONFIG[tipo].limite + (typeof habEspecExtras !== "undefined" ? (habEspecExtras[tipo] || 0) : 0);
+  return contarEspecTotal(tipo) < limite;
 }
 
 function modEspecPorNome(nome) {
@@ -499,8 +500,11 @@ function renderSubLivres(pericia) {
         <option value="mr">Muito Ruim (−5)</option>
       </select>
       <span class="espec-modificador" id="mod-livre-${item.id}"></span>
+      <span class="pericia-total" id="tot-livre-${item.id}"></span>
       <button type="button" class="btn-remover" onclick="removerSubLivre('${pericia}',${item.id})">×</button>`;
     lista.appendChild(div);
+    const sel = div.querySelector("select");
+    if (sel) sel.value = item.espec || "";
   });
 }
 
@@ -557,9 +561,15 @@ function todasSubpericiasComEspec() {
   return lista;
 }
 
+// Valor de "Ação de Conforto" pendente de aplicação após restaurar uma ficha.
+// Necessário porque o select é repopulado dinamicamente (a partir das
+// especializações escolhidas) e setar .value direto não funciona se a
+// <option> correspondente ainda não existir no DOM naquele momento.
+let _selConfortoPendente = null;
+
 function atualizarSelectConforto() {
   const sel = document.getElementById("sel-conforto");
-  const atual = sel.value;
+  const atual = _selConfortoPendente !== null ? _selConfortoPendente : sel.value;
   sel.innerHTML = '<option value="">— selecione —</option>';
   todasSubpericiasComEspec().forEach(({nome, mod}) => {
     const opt = document.createElement("option");
@@ -568,8 +578,9 @@ function atualizarSelectConforto() {
     opt.textContent = `${nome}${modStr}`;
     sel.appendChild(opt);
   });
-  // Mantém seleção se ainda existe
+  // Mantém seleção se ainda existe (ou aplica o valor pendente de uma ficha recém-carregada)
   if (atual && [...sel.options].some(o=>o.value===atual)) sel.value = atual;
+  _selConfortoPendente = null;
 }
 
 function valorConforto() {
@@ -829,7 +840,7 @@ function setProgDirecto(p, novoValor) {
   if (isNaN(novoValor) || novoValor < 0) novoValor = 0;
   const atual   = ppProgressao[p] || 0;
   const delta   = novoValor - atual;
-  const base    = (pericias[p] || 0) - (ppHabEfeito[p] || 0);
+  const base    = pericias[p] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
   const ppDed   = totalPPDedPorPericia ? totalPPDedPorPericia(p) : 0;
   const maxima  = maxPericiaComExtra(p);
   const dispProg = calcPPProgressaoDisp() - calcPPProgressaoGasto();
@@ -930,6 +941,7 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
   ativas.forEach(s => {
     const eId  = `espec-ded-${cssId(s.nome)}`;
     const mId  = `mod-ded-${cssId(s.nome)}`;
+    const tId  = `tot-ded-${cssId(s.nome)}`;
     const atual = especJustiça[s.nome] || "";
     // Ensure registered
     if (especJustiça[s.nome] === undefined) especJustiça[s.nome] = "";
@@ -945,6 +957,7 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
         <option value="mr">Muito Ruim (−5)</option>
       </select>
       <span class="espec-modificador" id="${mId}"></span>
+      <span class="pericia-total" id="${tId}"></span>
     </div>`;
   });
   html += `</div>`;
@@ -955,11 +968,14 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
   containerEl.insertAdjacentHTML("beforeend", html);
 
   // Update select states
+  const baseJ = calcValorPericia(pericia);
   ativas.forEach(s => {
     const eId  = `espec-ded-${cssId(s.nome)}`;
     const mId  = `mod-ded-${cssId(s.nome)}`;
+    const tId  = `tot-ded-${cssId(s.nome)}`;
     const sel  = document.getElementById(eId);
     const modEl= document.getElementById(mId);
+    const totEl= document.getElementById(tId);
     const atual= especJustiça[s.nome] || "";
     if (sel) {
       sel.value = atual;
@@ -979,6 +995,10 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
         modEl.textContent = "";
         modEl.className = "espec-modificador";
       }
+    }
+    if (totEl) {
+      const m = atual ? ESPEC_CONFIG[atual].mod : 0;
+      totEl.textContent = baseJ + m;
     }
   });
 }
@@ -1111,13 +1131,12 @@ function atualizarUI() {
     }
   });
 
-  // Contadores espec
-  const lims = {
-    mb: 3 + (habEspecExtras?.mb || 0),
-    b:  7 + (habEspecExtras?.b  || 0),
-    r:  3 + (habEspecExtras?.r  || 0),
-    mr: 2 + (habEspecExtras?.mr || 0)
-  };
+  // Contadores espec — lê os limites direto de ESPEC_CONFIG (fonte única) em vez
+  // de repetir os números aqui, para nunca mais dessincronizar (ex: "r" estava 3 em vez de 4)
+  const lims = {};
+  ["mb","b","r","mr"].forEach(t => {
+    lims[t] = ESPEC_CONFIG[t].limite + (habEspecExtras?.[t] || 0);
+  });
   ["mb","b","r","mr"].forEach(t=>{
     const el=document.getElementById(`cnt-${t}`);
     const c=contarEspecTotal(t);
@@ -1142,6 +1161,7 @@ function atualizarUI() {
       if (atrib === "Poder" && especPericias[p] !== undefined) {
         const sel = document.getElementById(`espec-per-${pEsc}`);
         const modEl = document.getElementById(`mod-per-${pEsc}`);
+        const totEl = document.getElementById(`tot-per-${pEsc}`);
         const atual = especPericias[p] || "";
         if (sel) {
           sel.value = atual;
@@ -1155,6 +1175,10 @@ function atualizarUI() {
         if (modEl) {
           if (atual) { const m = ESPEC_CONFIG[atual].mod; modEl.textContent=(m>0?"+":"")+m; modEl.className="espec-modificador "+(m>0?"mod-pos":"mod-neg"); }
           else { modEl.textContent=""; modEl.className="espec-modificador"; }
+        }
+        if (totEl) {
+          const m = atual ? ESPEC_CONFIG[atual].mod : 0;
+          totEl.textContent = calcValorPericia(p) + m;
         }
       }
 
@@ -1175,6 +1199,11 @@ function atualizarUI() {
         if(modEl){
           if(atual){const m=ESPEC_CONFIG[atual].mod; modEl.textContent=(m>0?"+":"")+m; modEl.className="espec-modificador "+(m>0?"mod-pos":"mod-neg");}
           else{modEl.textContent="";modEl.className="espec-modificador";}
+        }
+        const totEl=document.getElementById(`tot-${cssId(s)}`);
+        if(totEl){
+          const m=atual?ESPEC_CONFIG[atual].mod:0;
+          totEl.textContent = calcValorPericia(p) + m;
         }
       });
 
@@ -1211,6 +1240,11 @@ function atualizarUI() {
           if(item.espec){const m=ESPEC_CONFIG[item.espec].mod; modEl.textContent=(m>0?"+":"")+m; modEl.className="espec-modificador "+(m>0?"mod-pos":"mod-neg");}
           else{modEl.textContent="";modEl.className="espec-modificador";}
         }
+        const totEl=document.getElementById(`tot-livre-${item.id}`);
+        if(totEl){
+          const m=item.espec?ESPEC_CONFIG[item.espec].mod:0;
+          totEl.textContent = calcValorPericia(p) + m;
+        }
       });
     });
   });
@@ -1246,6 +1280,17 @@ function reordenarPericiasDOM() {
   if (focused && contPer.contains(focused)) {
     focused.focus({ preventScroll: true });
   }
+}
+
+// Reordena o bloco de atributos (drag-and-drop) conforme ordemRanking — usado
+// ao restaurar uma ficha salva, para não perder a ordem escolhida pelo jogador
+function reordenarAtributosDOM() {
+  const cont = document.getElementById('atributos-container');
+  if (!cont) return;
+  ordemRanking.forEach(nome => {
+    const bloco = cont.querySelector(`[data-nome="${nome}"]`);
+    if (bloco) cont.appendChild(bloco);
+  });
 }
 
 
@@ -2204,6 +2249,7 @@ ATRIBUTOS.forEach(atrib=>{
           <option value="mr">Muito Ruim (−5)</option>
         </select>
         <span class="espec-modificador" id="mod-per-${pEsc}"></span>
+        <span class="pericia-total" id="tot-per-${pEsc}"></span>
       ` : ""}
     </div>
     ${isPoderEsp && p === "Desarmado" ? `
@@ -2236,6 +2282,7 @@ ATRIBUTOS.forEach(atrib=>{
           <option value="mr">Muito Ruim (−5)</option>
         </select>
         <span class="espec-modificador" id="mod-${sEsc}"></span>
+        <span class="pericia-total" id="tot-${sEsc}"></span>
       </div>`;
     });
 
@@ -2655,11 +2702,11 @@ function renderHabCatalogoMini(containerId, rud, tiposPermitidos) {
     const visible = h.tipo === activeTab ? "" : "display:none;";
     html += `<label class="hab-cat-mini-item" style="${visible}">
       <input type="radio" name="hab-cat-mini-${containerId}" value="${escHTML(h.nome)}"
-        data-desc="${escHTML(h.desc||"")}" data-tipo="${h.tipo}">
+        data-desc="${escHTML(h.descricao||"")}" data-tipo="${h.tipo}">
       <div class="hab-cat-mini-item-body">
         <div class="hab-cat-mini-nome">${escHTML(h.nome)}</div>
         <div class="hab-cat-mini-tipo">${h.arq} — ${tiposLabel[h.tipo]||h.tipo}</div>
-        ${h.desc ? `<div class="hab-cat-mini-desc">${escHTML(h.desc.substring(0,100))}${h.desc.length>100?"...":""}</div>` : ""}
+        ${h.descricao ? `<div class="hab-cat-mini-desc">${escHTML(h.descricao.substring(0,100))}${h.descricao.length>100?"...":""}</div>` : ""}
       </div>
     </label>`;
   });
@@ -2983,7 +3030,7 @@ function renderBonusConexao() {
         let inputs = perDed.map(p => {
           const val = pool[p] || 0;
           const maxP = maxPericiaComExtra(p);
-          const baseP    = (pericias[p] || 0) - (ppHabEfeito[p] || 0);
+          const baseP    = pericias[p] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
           const ppProgP  = ppProgressao[p] || 0;
           const ppDedOther = calcPPDedOutros(rud, nv, p);
           const totalAtual = baseP + ppProgP + ppDedOther + val;
@@ -3039,13 +3086,14 @@ function mudarPPDed(rud, nv, pericia, delta) {
   if (delta > 0 && gastoNv >= 8) return;
 
   // Verifica limite da perícia (max 20, sem ultrapassar)
-  const baseP    = (pericias[pericia] || 0) - (ppHabEfeito[pericia] || 0); // real nivel1 PP
+  const baseP    = pericias[pericia] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
   const ppProgP  = ppProgressao[pericia]|| 0;
   const ppDedOut = calcPPDedOutros(rud, nv, pericia);
   const maxP     = maxPericiaComExtra(pericia);
   if (delta > 0 && baseP + ppProgP + ppDedOut + novo > maxP) return;
 
   pool[pericia] = novo;
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
   renderBonusConexao();
   renderPPProgressao();
   // Atualiza níveis de Justiça
@@ -3053,6 +3101,7 @@ function mudarPPDed(rud, nv, pericia, delta) {
     renderJustiçaExtra(pericia);
     atualizarSelectConforto();
   }
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
 }
 
 // Total de PP de Justiça extras para uma perícia (de todos os pools)
@@ -3109,15 +3158,19 @@ function atualizarNivelBotoes() {
   ["prim","sec"].forEach(rud => {
     const inputId = rud === "prim" ? "rud-primario-nivel" : "rud-secundario-nivel";
     const btnId   = rud === "prim" ? "btn-upar-prim" : "btn-upar-sec";
+    const btnDesfId = rud === "prim" ? "btn-desfazer-prim" : "btn-desfazer-sec";
     const atribSel = rud === "prim" ? "rud-primario" : "rud-secundario";
     const input = document.getElementById(inputId);
     const btn   = document.getElementById(btnId);
+    const btnDesf = document.getElementById(btnDesfId);
     const atrib = document.getElementById(atribSel)?.value;
     if (!btn || !input) return;
     const nivel = parseInt(input.value) || 1;
     // Disable if max or if no rudimento selected
     btn.disabled = nivel >= 10 || !atrib;
     btn.style.opacity = (nivel >= 10 || !atrib) ? "0.4" : "1";
+    // Botão de desfazer só aparece se já houver nível upado (acima de 1)
+    if (btnDesf) btnDesf.style.display = (atrib && nivel > 1) ? "" : "none";
   });
 }
 
@@ -3171,6 +3224,7 @@ function avancarFaseNivel(rud, nivel) {
   renderBonusConexao();
   renderPPProgressao();
   if (snapshotN1) renderInfoCalculadas();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
 }
 
 function faseNivelCompleto(rud, nivel) {
@@ -3471,13 +3525,14 @@ function mudarPericiaProgressao(p, delta) {
   const novo   = atual + delta;
   if (novo < 0) return;
   // Check max: base nivel1 + progressao + ppDed <= maxima com extra
-  const base   = (pericias[p] || 0) - (ppHabEfeito[p] || 0); // real nivel1 PP
+  const base   = pericias[p] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
   const ppDed  = totalPPDedPorPericia ? totalPPDedPorPericia(p) : 0;
   const maxima = maxPericiaComExtra(p);
   if (base + novo + ppDed > maxima) return;
   // Check pool
   if (delta > 0 && calcPPProgressaoGasto() >= calcPPProgressaoDisp()) return;
   ppProgressao[p] = novo;
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
   renderPPProgressao();
   // Atualiza níveis de Justiça se necessário
   if (PERICIAS_DEDICACAO_NIVEL.includes(p) || PERICIAS_DEDICACAO_NORMAL.includes(p)) {
@@ -3504,7 +3559,7 @@ function renderPPProgressao() {
   ATRIBUTOS.forEach(atrib => {
     PERICIAS_POR_ATRIBUTO[atrib].forEach(p => {
       const pEsc  = cssId(p);
-      const base  = (pericias[p] || 0) - (ppHabEfeito[p] || 0); // real nivel1 PP (no hab effect)
+      const base  = pericias[p] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
       const habEf = ppHabEfeito[p] || 0;
       const prog  = ppProgressao[p] || 0;
       const maxima = maxPericiaComExtra(p);
@@ -4340,7 +4395,10 @@ function abrirPopupNivel(rud) {
   _uparPPDed = {};
   _uparPPGeral = {};
   renderPopupNivel();
-  document.getElementById("upar-overlay").classList.add("open");
+  const overlay = document.getElementById("upar-overlay");
+  overlay.classList.remove("rud-prim", "rud-sec");
+  overlay.classList.add(rud === "prim" ? "rud-prim" : "rud-sec");
+  overlay.classList.add("open");
 }
 
 function fecharPopupNivel() {
@@ -4554,8 +4612,11 @@ function uparEscolhaRadioClick(radio) {
 
   } else if (hasSub === "texto" && (opcId === "vant" || opcId === "vant5")) {
     // Vantagem: auto-filled with connected atrib, no selection needed
+    const corVar  = rud === "prim" ? "--rud-prim" : "--rud-sec";
+    const corDark = rud === "prim" ? "--rud-prim-dark" : "--rud-sec-dark";
+    const corMid  = rud === "prim" ? "--rud-prim-mid" : "--rud-sec-mid";
     subEl.innerHTML = `
-      <div style="padding:6px 8px;background:#e8f4d4;border:1px solid #b5d97a;border-radius:4px;font-size:0.85em;">
+      <div style="padding:6px 8px;background:var(${corDark});border:1px solid var(${corMid});border-radius:4px;font-size:0.85em;color:var(${corVar});">
         Vantagem aplicada automaticamente em testes de <b>${atribConex}</b> (rudimento ${rud === "prim" ? "primário" : "secundário"}).
       </div>
       <input type="hidden" id="upar-sub-txt-${rud}-${nv}-${opcId}" value="${atribConex}">`;
@@ -4670,14 +4731,16 @@ function uparPPDed(rud, nv, pericia, delta) {
   const gasto = Object.values(pool).reduce((s,v) => s+v, 0);
   if (delta > 0 && gasto >= 8) return;
   // Cap check
-  const baseP  = (pericias[pericia] || 0) - (ppHabEfeito[pericia] || 0);
+  const baseP  = pericias[pericia] || 0; // PP real do nível 1 (ppHabEfeito é um bônus separado, nunca somado aqui)
   const progP  = ppProgressao[pericia] || 0;
   const outP   = calcPPDedOutros(rud, nv, pericia);
   const maxP   = maxPericiaComExtra(pericia);
   if (delta > 0 && baseP + progP + outP + novo > maxP) return;
   pool[pericia] = novo;
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
   renderBonusConexao();
   renderPopupNivel();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
 }
 
 function confirmarUpagem() {
@@ -4721,6 +4784,79 @@ function confirmarUpagem() {
 
   const atrib = rud === "prim" ? progState.primario : progState.secundario;
   progAvisar(`Confirmar Nível ${proximoNivel} de ${atrib} confirmado! Distribua os PP de progressão nas perícias.`, "ok");
+}
+
+// ── Desfazer Nível ────────────────────────────────────────────────────────
+// Reverte o último nível upado de um rudimento (prim/sec), removendo tudo que
+// aquele nível especificamente concedeu: a escolha do nível (e seus efeitos —
+// habilidade grátis, limite de perícia +5), o pool de PP de Justiça daquele
+// nível, e os 12 PP de upagem ganhos. Bônus automáticos de PV/PM/TE/DEF/PP
+// (via bonusDeNiveis/calcBonusConexao) são derivados do nível e não precisam
+// de reversão manual — eles somem sozinhos ao decrementar o nível.
+function desfazerNivel(rud) {
+  const inputId = rud === "prim" ? "rud-primario-nivel" : "rud-secundario-nivel";
+  const input   = document.getElementById(inputId);
+  if (!input) return;
+  const nivelAtual = parseInt(input.value) || 1;
+  if (nivelAtual <= 1) { progAvisar("Já está no nível 1."); return; }
+
+  const atrib = rud === "prim" ? progState.primario : progState.secundario;
+
+  // Verifica quanto PP de progressão já foi gasto em perícias/habs/feitiços,
+  // pois desfazer o nível reduz o PP disponível total (12 PP) e pode deixar
+  // o jogador com mais PP gasto do que o novo limite permite.
+  const gastoAtual = calcPPProgressaoGasto();
+  const dispAposDesfazer = calcPPProgressaoDisp() - 12;
+  const ficaNegativo = gastoAtual > Math.max(0, dispAposDesfazer);
+
+  const avisoExtra = ficaNegativo
+    ? `\n\nATENÇÃO: você já distribuiu mais PP de progressão do que sobrará após desfazer este nível. O sistema não vai remover PP já gastos em perícias automaticamente — você precisará ajustá-los manualmente depois.`
+    : "";
+  const ok = confirm(`Desfazer o nível ${nivelAtual} de ${atrib || "este rudimento"}?\n\nIsso vai remover a escolha feita nesse nível (e o que ela concedeu), os PP de Justiça distribuídos nesse nível, e os 12 PP de upagem ganhos.${avisoExtra}\n\nEsta ação não pode ser desfeita.`);
+  if (!ok) return;
+
+  // 1) Remove feitiços grátis concedidos pela escolha deste nível (feitco/feitco5),
+  // já que removerEscolha não reverte esse efeito sozinha (a criação do feitiço
+  // acontece fora dela, via adicionarFeiticoProgresso)
+  progState.escolhas[rud]
+    .filter(e => e.nivelEscolha === nivelAtual && (e.opcao === "feitco" || e.opcao === "feitco5") && e.sub)
+    .forEach(e => {
+      const fIdx = feiticos.findIndex(f => f.gratis && f.nome === e.sub);
+      if (fIdx !== -1) feiticos.splice(fIdx, 1);
+    });
+
+  // 2) Remove TODAS as escolhas feitas neste nível (reverte hab grátis / limite+5 / etc via removerEscolha)
+  // removerEscolha já faz splice + reseta fase + chama atualizarProgressao, então repetimos até não haver mais
+  while (progState.escolhas[rud].some(e => e.nivelEscolha === nivelAtual)) {
+    removerEscolha(rud, nivelAtual);
+  }
+
+  // 3) Limpa o pool de PP de Justiça distribuído neste nível (se houver)
+  if (progState.ppDedPool[rud]) {
+    delete progState.ppDedPool[rud][nivelAtual];
+  }
+
+  // 4) Remove os 12 PP de upagem ganhos neste nível
+  ppUpagemPool = Math.max(0, ppUpagemPool - 12);
+
+  // 5) Decrementa o nível
+  input.value = nivelAtual - 1;
+  if (rud === "prim") progState.nivelPrimario = nivelAtual - 1;
+  else progState.nivelSecundario = nivelAtual - 1;
+
+  // Re-renderiza tudo que depende do nível
+  atualizarProgressao();
+  atualizarNivelBotoes();
+  renderEscolhasRud(rud);
+  renderBonusConexao();
+  renderPPProgressao();
+  renderHabFontes();
+  renderFeiticos();
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
+  if (snapshotN1) renderInfoCalculadas();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
+
+  progAvisar(`Nível ${nivelAtual} de ${atrib} desfeito.${ficaNegativo ? " Revise os PP já distribuídos." : ""}`, ficaNegativo ? "warn" : "ok");
 }
 
 // ════════════════════════════════════════════════════════
@@ -5375,7 +5511,7 @@ function feiticorenderDados() {
 
 // PP disponível líquido para uma perícia nas fontes do feitiço atual
 function feiticoPPDisponivel(pericia, excluirIdx = -1) {
-  const total = calcValorPericia(pericia);
+  const total = calcValorPericia(pericia) - (ppHabEfeito[pericia] || 0); // pontos de habilidade (ex: Alinhado pelo Meio) não são gastáveis
   // Gastos em outros feitiços
   const emOutrosFeiticos = feiticos
     .filter(x => !x.gratis && x.id !== _feiticoEditId)
@@ -5628,34 +5764,187 @@ function habRemEspec(tipo) {
 // Extra espec slots from habilidades (tracked separately)
 
 // ── ALINHADO PELO MEIO ────────────────────────────────────────────────────────
+// Regra: "nenhuma Perícia pode ter valor inferior a 5" enquanto a habilidade
+// estiver ativa. Isso é um PISO PERMANENTE, não um bônus fixo calculado uma
+// única vez — por isso precisa ser recalculado sempre que qualquer fator que
+// compõe o valor da perícia mudar (progressão, PP de Justiça, etc), senão a
+// perícia pode cair de novo abaixo de 5 depois que o jogador realoca pontos.
+function habAlinhadoAtivo() {
+  return habilidades.some(h => h.nome === "ALINHADO PELO MEIO:");
+}
+
+// Recalcula ppHabEfeito para TODAS as perícias com base no estado atual,
+// garantindo o piso de 5 enquanto "Alinhado pelo Meio" estiver ativo.
+// Deve ser chamada sempre que base/progressão/PP de Justiça/conexão mudarem.
+function habAlinhadoRecalcular() {
+  if (!habAlinhadoAtivo()) return;
+  ATRIBUTOS.forEach(atrib => {
+    PERICIAS_POR_ATRIBUTO[atrib].forEach(p => {
+      const base = pericias[p] || 0;
+      const prog = ppProgressao[p] || 0;
+      const ded  = typeof totalPPDedPorPericia === "function" ? totalPPDedPorPericia(p) : 0;
+      const bc   = typeof calcBonusPericiaConexao === "function" ? calcBonusPericiaConexao(p) : 0;
+      // Tudo que NÃO é o próprio bônus da habilidade:
+      const semHab = base + prog + ded + bc;
+      ppHabEfeito[p] = Math.max(0, 5 - semHab);
+    });
+  });
+}
+
 HAB_EFFECTS["ALINHADO PELO MEIO:"] = {
   apply(hab) {
     // Only write to ppHabEfeito — never touch pericias[] (nivel 1 pool)
-    hab._alinhado_delta = {};
-    ATRIBUTOS.forEach(atrib => {
-      PERICIAS_POR_ATRIBUTO[atrib].forEach(p => {
-        const base  = pericias[p] || 0;
-        const prog  = ppProgressao[p] || 0;
-        const ded   = typeof totalPPDedPorPericia === "function" ? totalPPDedPorPericia(p) : 0;
-        const atual = base + prog + ded + (ppHabEfeito[p] || 0);
-        if (atual < 5) {
-          const delta = 5 - atual;
-          hab._alinhado_delta[p] = delta;
-          ppHabEfeito[p] = (ppHabEfeito[p] || 0) + delta;
-        }
-      });
-    });
+    habAlinhadoRecalcular();
     habAddEspec("b");
   },
   undo(hab) {
-    if (hab._alinhado_delta) {
-      Object.entries(hab._alinhado_delta).forEach(([p, delta]) => {
-        ppHabEfeito[p] = Math.max(0, (ppHabEfeito[p] || 0) - delta);
-      });
-    }
+    // Zera o bônus de habilidade de todas as perícias (o piso deixa de existir)
+    Object.keys(ppHabEfeito).forEach(p => { ppHabEfeito[p] = 0; });
     habRemEspec("b");
+    // Desfaz a troca de especialização (Ruim removida / Bom adicionado), se já tiver sido feita
+    if (hab._alinhado_addedB) {
+      habAlinhadoSetTier(hab._alinhado_addedB, hab._alinhado_addedB.tierAnterior || "");
+      delete hab._alinhado_addedB;
+    }
+    if (hab._alinhado_removedR) {
+      habAlinhadoSetTier(hab._alinhado_removedR, "r");
+      delete hab._alinhado_removedR;
+    }
   }
 };
+
+// Lista todas as subperícias/especializações "ativas" da ficha, de todas as fontes
+// (fixas, diretas em Poder, subperícias de Justiça desbloqueadas, e subperícias livres)
+function habAlinhadoListarSubs() {
+  const lista = [];
+  Object.keys(especFixas).forEach(nome => {
+    lista.push({ nome, tier: especFixas[nome] || "", fonte: "fixa" });
+  });
+  Object.keys(especPericias).forEach(nome => {
+    lista.push({ nome, tier: especPericias[nome] || "", fonte: "pericia" });
+  });
+  (PERICIAS_POR_ATRIBUTO["Justiça"] || []).forEach(p => {
+    (typeof subsJustiçaAtivas === "function" ? subsJustiçaAtivas(p) : []).forEach(s => {
+      lista.push({ nome: s.nome, tier: especJustiça[s.nome] || "", fonte: "justica" });
+    });
+  });
+  Object.keys(subLivres).forEach(p => {
+    (subLivres[p] || []).forEach(it => {
+      lista.push({ nome: it.nome, tier: it.espec || "", fonte: "livre", id: it.id });
+    });
+  });
+  return lista;
+}
+
+// Aplica um novo tier (""|"mb"|"b"|"r"|"mr") a um item retornado por habAlinhadoListarSubs
+function habAlinhadoSetTier(item, tier) {
+  if (item.fonte === "fixa")          especFixas[item.nome] = tier;
+  else if (item.fonte === "pericia")  especPericias[item.nome] = tier;
+  else if (item.fonte === "justica")  especJustiça[item.nome] = tier;
+  else if (item.fonte === "livre") {
+    for (const p in subLivres) {
+      const it = subLivres[p].find(x => x.id === item.id);
+      if (it) { it.espec = tier; break; }
+    }
+  }
+}
+
+// ── Pop-up: Remover Ruim / Adquirir Bom extra (Alinhado pelo Meio) ────────────
+let _alinhadoHabId = null;
+
+function habAlinhadoAbrirPopup(habId) {
+  _alinhadoHabId = habId;
+  renderAlinhadoPopup();
+  const overlay = document.getElementById("alinhado-overlay");
+  if (overlay) overlay.classList.add("open");
+}
+
+function habAlinhadoFechar() {
+  const overlay = document.getElementById("alinhado-overlay");
+  if (overlay) overlay.classList.remove("open");
+  _alinhadoHabId = null;
+}
+
+function renderAlinhadoPopup() {
+  const cont = document.getElementById("alinhado-modal-content");
+  if (!cont) return;
+  const hab = habilidades.find(h => h.id === _alinhadoHabId);
+
+  const subs    = habAlinhadoListarSubs();
+  const ruins   = subs.filter(s => s.tier === "r");
+  const bonsAlvo = subs.filter(s => s.tier !== "b");
+
+  let html = `<h4 style="margin-top:0;">Alinhado pelo Meio</h4>
+    <p style="font-size:0.85em;color:#aab;line-height:1.4;">Remova uma de suas especializações "Ruim" e escolha uma especialização para se tornar "Bom" (slot extra concedido por esta Habilidade).</p>`;
+
+  html += `<div style="margin:14px 0;">
+    <strong style="font-size:0.85em;">Remover uma especialização "Ruim":</strong>`;
+  if (ruins.length) {
+    html += `<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto;">`;
+    ruins.forEach((s, i) => {
+      html += `<label style="display:flex;gap:6px;align-items:center;font-size:0.85em;">
+        <input type="radio" name="alinhado-ruim" value="${i}">
+        ${escHTML(s.nome)}
+      </label>`;
+    });
+    html += `</div>
+    <label style="display:flex;gap:6px;align-items:center;font-size:0.82em;margin-top:6px;color:#9ab;">
+      <input type="radio" name="alinhado-ruim" value="-1" checked> Nenhuma (decidir depois)
+    </label>`;
+  } else {
+    html += `<p style="font-size:0.82em;color:#9ab;font-style:italic;margin-top:6px;">Você não possui nenhuma especialização "Ruim" no momento.</p>`;
+  }
+  html += `</div>`;
+
+  html += `<div style="margin:14px 0;">
+    <strong style="font-size:0.85em;">Escolha a especialização que se tornará "Bom" extra:</strong>
+    <select id="alinhado-bom-select" style="width:100%;margin-top:6px;padding:6px;border-radius:6px;">
+      <option value="-1">— decidir depois —</option>`;
+  bonsAlvo.forEach((s, i) => {
+    const atualLabel = s.tier ? ` (atual: ${ESPEC_CONFIG[s.tier].label})` : "";
+    html += `<option value="${i}">${escHTML(s.nome)}${atualLabel}</option>`;
+  });
+  html += `</select></div>`;
+
+  html += `<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+    <button type="button" class="save-btn" onclick="habAlinhadoFechar()">Fechar</button>
+    <button type="button" class="save-btn primary" onclick="habAlinhadoConfirmar()">Confirmar</button>
+  </div>`;
+
+  cont.innerHTML = html;
+  cont._ruins = ruins;
+  cont._bons  = bonsAlvo;
+}
+
+function habAlinhadoConfirmar() {
+  const hab = habilidades.find(h => h.id === _alinhadoHabId);
+  const cont = document.getElementById("alinhado-modal-content");
+  if (!hab || !cont) { habAlinhadoFechar(); return; }
+
+  const ruinSel = document.querySelector('input[name="alinhado-ruim"]:checked');
+  const ruinIdx = ruinSel ? parseInt(ruinSel.value) : -1;
+  const bomSel  = document.getElementById("alinhado-bom-select");
+  const bomIdx  = bomSel ? parseInt(bomSel.value) : -1;
+
+  // Desfaz seleção anterior (se o usuário estiver reabrindo para ajustar)
+  if (hab._alinhado_removedR) { habAlinhadoSetTier(hab._alinhado_removedR, "r"); delete hab._alinhado_removedR; }
+  if (hab._alinhado_addedB)   { habAlinhadoSetTier(hab._alinhado_addedB, hab._alinhado_addedB.tierAnterior || ""); delete hab._alinhado_addedB; }
+
+  if (ruinIdx >= 0 && cont._ruins[ruinIdx]) {
+    const item = cont._ruins[ruinIdx];
+    habAlinhadoSetTier(item, "");
+    hab._alinhado_removedR = { nome: item.nome, fonte: item.fonte, id: item.id };
+  }
+  if (bomIdx >= 0 && cont._bons[bomIdx]) {
+    const item = cont._bons[bomIdx];
+    habAlinhadoSetTier(item, "b");
+    hab._alinhado_addedB = { nome: item.nome, fonte: item.fonte, id: item.id, tierAnterior: item.tier };
+  }
+
+  habAlinhadoFechar();
+  atualizarUI();
+  habMostrarAviso(`Especializações de "Alinhado pelo Meio" atualizadas.`, "ok");
+}
 
 // ── SABE-TUDO ────────────────────────────────────────────────────────────────
 HAB_EFFECTS["SABE-TUDO:"] = {
@@ -5772,6 +6061,11 @@ function refreshHabBadges() {
   });
 }
 
+// Hooks executados uma vez, logo após o efeito de uma habilidade ser aplicado
+// (ex: abrir um pop-up de configuração adicional)
+const HAB_POST_APPLY = {};
+HAB_POST_APPLY["ALINHADO PELO MEIO:"] = (hab) => habAlinhadoAbrirPopup(hab.id);
+
 function habAplicarEfeito(hab) {
   const effect = HAB_EFFECTS[hab.nome];
   if (!effect) return false;
@@ -5779,6 +6073,7 @@ function habAplicarEfeito(hab) {
     effect.apply(hab);
     refreshHabBadges();
     atualizarUI();
+    if (HAB_POST_APPLY[hab.nome]) HAB_POST_APPLY[hab.nome](hab);
     return true;
   } catch(e) {
     console.warn("Erro ao aplicar efeito:", hab.nome, e);
@@ -5879,6 +6174,7 @@ function renderHabLista() {
         </div>
         ${h.desc ? `<div class="hab-item-desc">${escHTML(h.desc).replace(/\n/g,'<br>')}</div>` : ""}
         ${!h.gratis && h.fontes.length ? `<div class="hab-item-fontes">${fontesStr}</div>` : ""}
+        ${h.nome === "ALINHADO PELO MEIO:" ? `<button type="button" class="hab-item-ajustar" style="margin-top:6px;font-size:0.78em;padding:3px 8px;border-radius:5px;cursor:pointer;background:rgba(85,131,217,.12);color:var(--accent);border:1px solid rgba(85,131,217,.3);" onclick="habAlinhadoAbrirPopup(${h.id})">Ajustar Ruim/Bom</button>` : ""}
       </div>
       <button type="button" class="hab-item-remove" onclick="removerHabilidade(${h.id})" title="Remover">×</button>
     </div>`;
@@ -6348,7 +6644,7 @@ let _nomePersonagem = "";   // nome para o arquivo
 // ── Serializar estado completo da ficha ───────────────────
 function fichaSerializar() {
   return {
-    _versao: 4,
+    _versao: 5,
     _salvoEm: new Date().toISOString(),
     nome: _nomePersonagem,
     // Personagem
@@ -6358,6 +6654,7 @@ function fichaSerializar() {
     persImagem:   document.getElementById("pers-imagem")?.src     || "",
     // Atributos
     atributos,
+    ordemRanking,
     // Perícias
     pericias,
     ppProgressao,
@@ -6365,10 +6662,24 @@ function fichaSerializar() {
     ppGastoHabilidades,
     ppGastoHabilidadesProg,
     ppHabEfeito,
+    // Especializações
+    especFixas,
+    especPericias,
+    especJustiça,
+    subLivres,
+    desarmadoTexto,
+    performancesSelecionadas: [...performancesSelecionadas],
+    paAtributos,
+    idContador,
     // Stats editáveis
     pvAtual: document.getElementById("pv-atual")?.value || "",
     pmAtual: document.getElementById("pm-atual")?.value || "",
     teAtual: document.getElementById("te-atual")?.value || "",
+    // Informações do Personagem (Ação de Conforto / bases de TE e PM)
+    selConforto:     document.getElementById("sel-conforto")?.value      || "",
+    campanhaLonga:   document.getElementById("chk-campanha-longa")?.checked || false,
+    selTeBase:       document.getElementById("sel-te-base")?.value       || "magia",
+    selPmBase:       document.getElementById("sel-pm-base")?.value       || "magia",
     // PF
     pfPV: progState.pfPV || 0,
     pfPM: progState.pfPM || 0,
@@ -6401,8 +6712,10 @@ function fichaSerializar() {
     armas:      armas.map(a => ({...a})),
     invNextId,
     armaNextId,
-    // Subperícas livres
-    subpericiasLivres: typeof subpericiasLivres !== "undefined" ? {...subpericiasLivres} : {},
+    // Anotações (antes só ficavam numa chave de localStorage separada, então
+    // não acompanhavam a ficha ao exportar/importar como JSON)
+    anotacoes: typeof anotacoes !== "undefined" ? anotacoes.map(a => ({...a})) : [],
+    anotNextId: typeof anotNextId !== "undefined" ? anotNextId : 2,
   };
 }
 
@@ -6425,19 +6738,66 @@ function fichaRestaurar(data) {
 
   // Atributos
   if (data.atributos) Object.assign(atributos, data.atributos);
+  if (Array.isArray(data.ordemRanking) && data.ordemRanking.length === ATRIBUTOS.length) {
+    ordemRanking = data.ordemRanking;
+    reordenarAtributosDOM();
+  }
 
   // Perícias
   if (data.pericias) Object.assign(pericias, data.pericias);
   if (data.ppProgressao) Object.assign(ppProgressao, data.ppProgressao);
-  if (typeof data.ppUpagemPool === "number") { window.ppUpagemPool = data.ppUpagemPool; }
+  if (typeof data.ppUpagemPool === "number") { ppUpagemPool = data.ppUpagemPool; }
   if (data.ppGastoHabilidades) Object.assign(ppGastoHabilidades, data.ppGastoHabilidades);
   if (data.ppGastoHabilidadesProg) Object.assign(ppGastoHabilidadesProg, data.ppGastoHabilidadesProg);
   if (data.ppHabEfeito) Object.assign(ppHabEfeito, data.ppHabEfeito);
+
+  // Especializações
+  if (data.especFixas)    Object.assign(especFixas, data.especFixas);
+  if (data.especPericias) Object.assign(especPericias, data.especPericias);
+  if (data.especJustiça)  Object.assign(especJustiça, data.especJustiça);
+  if (data.subLivres) {
+    Object.keys(subLivres).forEach(k => delete subLivres[k]);
+    Object.assign(subLivres, data.subLivres);
+    Object.keys(subLivres).forEach(p => { if (typeof renderSubLivres === "function") renderSubLivres(p); });
+  }
+  if (typeof data.desarmadoTexto === "string") {
+    desarmadoTexto = data.desarmadoTexto;
+    const elDes = document.getElementById("desarmado-texto");
+    if (elDes) elDes.value = desarmadoTexto;
+  }
+  if (Array.isArray(data.performancesSelecionadas)) {
+    performancesSelecionadas.clear();
+    data.performancesSelecionadas.forEach(p => performancesSelecionadas.add(p));
+  }
+  if (data.paAtributos) Object.assign(paAtributos, data.paAtributos);
+  if (typeof data.idContador === "number") idContador = data.idContador;
 
   // Stats
   if (data.pvAtual) { const el = document.getElementById("pv-atual"); if (el) el.value = data.pvAtual; }
   if (data.pmAtual) { const el = document.getElementById("pm-atual"); if (el) el.value = data.pmAtual; }
   if (data.teAtual) { const el = document.getElementById("te-atual"); if (el) el.value = data.teAtual; }
+
+  // Informações do Personagem (Ação de Conforto / bases de TE e PM)
+  // sel-conforto é repopulado dinamicamente por atualizarSelectConforto() — que
+  // roda dentro de atualizarUI(), chamada DEPOIS de fichaRestaurar(). Setar
+  // sel.value direto aqui não funcionaria (a <option> ainda não existe), então
+  // guardamos o valor em _selConfortoPendente, que atualizarSelectConforto()
+  // aplica assim que repopula as opções.
+  if (typeof data.selConforto === "string") {
+    _selConfortoPendente = data.selConforto;
+  }
+  if (typeof data.campanhaLonga === "boolean") {
+    const el = document.getElementById("chk-campanha-longa");
+    if (el) el.checked = data.campanhaLonga;
+  }
+  if (typeof data.selTeBase === "string") {
+    const el = document.getElementById("sel-te-base");
+    if (el) el.value = data.selTeBase;
+  }
+  if (typeof data.selPmBase === "string") {
+    const el = document.getElementById("sel-pm-base");
+    if (el) el.value = data.selPmBase;
+  }
 
   // PF
   if (data.pfPV !== undefined) progState.pfPV = data.pfPV;
@@ -6459,6 +6819,16 @@ function fichaRestaurar(data) {
     if (ps.periciasLimiteExtra)           progState.periciasLimiteExtra = ps.periciasLimiteExtra;
     if (ps.ppDedPool)                     Object.assign(progState.ppDedPool, ps.ppDedPool);
     if (ps.atribConexao)                  Object.assign(progState.atribConexao, ps.atribConexao);
+    // Restore rudimento primário/secundário selects — atualizarProgressao() lê o valor
+    // diretamente do <select>, então sem isso a conexão se perdia ao recarregar
+    if (ps.primario) {
+      const el = document.getElementById("rud-primario");
+      if (el) el.value = ps.primario;
+    }
+    if (ps.secundario) {
+      const el = document.getElementById("rud-secundario");
+      if (el) el.value = ps.secundario;
+    }
     // Restore level inputs
     if (ps.nivelPrimario) {
       const el = document.getElementById("rud-primario-nivel");
@@ -6470,9 +6840,10 @@ function fichaRestaurar(data) {
     }
   }
 
-  // SnapshotN1
+  // SnapshotN1 — variável de escopo do script, "window.snapshotN1 = ..." nunca
+  // a atualizava de fato (let não cria propriedade em window)
   if (data.snapshotN1) {
-    window.snapshotN1 = data.snapshotN1;
+    snapshotN1 = data.snapshotN1;
     document.querySelectorAll('[id^="prog-ctrl-"]').forEach(el => el.style.display = "flex");
     const btnN1 = document.getElementById("btn-salvar-n1");
     if (btnN1) btnN1.textContent = "Salvo — clique para re-salvar";
@@ -6484,12 +6855,15 @@ function fichaRestaurar(data) {
 
   // Habilidades
   if (data.habilidades) { habilidades.length = 0; data.habilidades.forEach(h => habilidades.push(h)); }
-  if (data.habNextId)   window.habNextId = data.habNextId;
+  if (data.habNextId)   habNextId = data.habNextId;
   if (data.habEspecExtras) Object.assign(habEspecExtras, data.habEspecExtras);
+  // Corrige fichas salvas com o bônus de "Alinhado pelo Meio" desatualizado
+  // (ex: progressão foi realocada depois que o bônus tinha sido fixado)
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
 
   // Feitiços
   if (data.feiticos)    { feiticos.length = 0; data.feiticos.forEach(f => feiticos.push(f)); }
-  if (data.feiticoNextId) window.feiticoNextId = data.feiticoNextId;
+  if (data.feiticoNextId) feiticoNextId = data.feiticoNextId;
 
   // Arquétipos
   if (data.arquetiposEscolhidos && typeof arquetiposEscolhidos !== "undefined") {
@@ -6500,12 +6874,17 @@ function fichaRestaurar(data) {
   // Inventário
   if (data.inventario)  { inventario.length = 0; data.inventario.forEach(i => inventario.push(i)); }
   if (data.armas)       { armas.length = 0; data.armas.forEach(a => armas.push(a)); }
-  if (data.invNextId)   window.invNextId  = data.invNextId;
-  if (data.armaNextId)  window.armaNextId = data.armaNextId;
+  if (data.invNextId)   invNextId  = data.invNextId;
+  if (data.armaNextId)  armaNextId = data.armaNextId;
 
-  // Subperícas livres
-  if (data.subpericiasLivres && typeof subpericiasLivres !== "undefined") {
-    Object.assign(subpericiasLivres, data.subpericiasLivres);
+  // Anotações (vêm dentro do JSON da ficha agora; mantém compatibilidade com
+  // fichas antigas que não tinham esse campo — nesse caso ficam como estavam,
+  // possivelmente vindas do localStorage separado via anotCarregarLS)
+  if (Array.isArray(data.anotacoes) && data.anotacoes.length) {
+    anotacoes = data.anotacoes;
+    anotNextId = typeof data.anotNextId === "number" ? data.anotNextId : anotNextId;
+    if (typeof anotRender === "function") anotRender();
+    _anotacoesRestauradasDaFicha = true;
   }
 
   return true;
@@ -6625,6 +7004,7 @@ function fichaImportarArquivo(input) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
+      _fichaCarregando = true;
       fichaRestaurar(data);
       // Re-render everything
       calcularRanking();
@@ -6636,12 +7016,18 @@ function fichaImportarArquivo(input) {
       renderFeiticos();
       renderInventario();
       renderArmas();
+      if (typeof refreshHabBadges === "function") refreshHabBadges();
+      if (typeof renderJustiçaExtra === "function") renderJustiçaExtra("Performance");
+      if (typeof renderPAAtributos === "function") renderPAAtributos();
       if (snapshotN1) { renderInfoCalculadas(); renderPPProgressao(); renderPPResumo(); }
       atualizarTopoRudArq();
       _nomePersonagem = data.nome || file.name.replace(".json","");
       localStorage.setItem(LS_KEY, JSON.stringify(data));
+      _fichaCarregando = false;
+      _fichaUnsaved = false;
       fichaSetStatus(`Ficha carregada: ${_nomePersonagem}`, "saved");
     } catch(err) {
+      _fichaCarregando = false;
       alert("Erro ao carregar ficha: " + err.message);
     }
     input.value = "";
@@ -6651,10 +7037,18 @@ function fichaImportarArquivo(input) {
 
 // ── Hooks: marcar dirty em mudanças ───────────────────────
 // Intercepta atualizarUI e atualizarProgressao
+let _fichaCarregando = false;
+
 const _origAtualizarUI_save = atualizarUI;
 atualizarUI = function() {
   _origAtualizarUI_save.apply(this, arguments);
-  fichaMarcaDirty();
+  if (!_fichaCarregando) fichaMarcaDirty();
+};
+
+const _origAtualizarProgressao_save = atualizarProgressao;
+atualizarProgressao = function() {
+  _origAtualizarProgressao_save.apply(this, arguments);
+  if (!_fichaCarregando) fichaMarcaDirty();
 };
 
 // ── Init: carregar do localStorage ────────────────────────
@@ -6663,6 +7057,7 @@ window.addEventListener('load', function fichaInit() {
     const saved = localStorage.getItem(LS_KEY);
     if (saved) {
       const data = JSON.parse(saved);
+      _fichaCarregando = true;
       fichaRestaurar(data);
       calcularRanking();
       atualizarUI();
@@ -6673,15 +7068,21 @@ window.addEventListener('load', function fichaInit() {
       renderFeiticos();
       renderInventario();
       renderArmas();
+      if (typeof refreshHabBadges === "function") refreshHabBadges();
+      if (typeof renderJustiçaExtra === "function") renderJustiçaExtra("Performance");
+      if (typeof renderPAAtributos === "function") renderPAAtributos();
       if (snapshotN1) { renderInfoCalculadas(); renderPPProgressao(); renderPPResumo(); }
       atualizarTopoRudArq();
       _nomePersonagem = data.nome || "";
+      _fichaCarregando = false;
+      _fichaUnsaved = false;
       const hora = new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
       fichaSetStatus(`Ficha restaurada: ${_nomePersonagem || "sem nome"} — salva às ${hora}`, "saved");
     } else {
       fichaSetStatus("Nenhuma ficha salva. Crie seu personagem e clique em Salvar arquivo.", "");
     }
   } catch(e) {
+    _fichaCarregando = false;
     fichaSetStatus("Erro ao restaurar ficha do cache.", "dirty");
   }
 });
@@ -6833,6 +7234,10 @@ calcFecharModal = function() {
 // ════════════════════════════════════════════════════════
 let anotacoes = [{ id: 1, titulo: "Título", texto: "", collapsed: false }];
 let anotNextId = 2;
+// true quando as anotações já foram restauradas a partir do JSON principal
+// da ficha (fichaRestaurar), para anotCarregarLS não sobrescrever com a cópia
+// antiga que vivia isolada no localStorage (chave "ficha-rpg-anotacoes").
+let _anotacoesRestauradasDaFicha = false;
 
 function anotRender() {
   const cont = document.getElementById("anotacoes-container");
@@ -6912,6 +7317,11 @@ function anotAutoSave() {
 }
 
 function anotCarregarLS() {
+  // Se a ficha principal (JSON) já trouxe anotações, não sobrescrever com a
+  // cópia antiga e potencialmente desatualizada que vivia isolada no
+  // localStorage. Isso só importa para fichas salvas antes desta correção;
+  // fichas novas não dependem mais dessa chave separada.
+  if (_anotacoesRestauradasDaFicha) { anotRender(); return; }
   try {
     const saved = localStorage.getItem("ficha-rpg-anotacoes");
     if (saved) {
