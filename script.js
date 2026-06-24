@@ -6729,11 +6729,21 @@ function fichaRestaurar(data) {
   if (data.persNome)     { const el = document.getElementById("pers-nome");     if (el) el.value = data.persNome; }
   if (data.persOcupacao) { const el = document.getElementById("pers-ocupacao"); if (el) el.value = data.persOcupacao; }
   if (data.persIdade)    { const el = document.getElementById("pers-idade");    if (el) el.value = data.persIdade; }
-  if (data.persImagem && data.persImagem.startsWith("data:")) {
+  {
     const img = document.getElementById("pers-imagem");
     const ph  = document.getElementById("pers-imagem-placeholder");
-    if (img) { img.src = data.persImagem; img.style.display = "block"; }
-    if (ph)  ph.style.display = "none";
+    const inp = document.getElementById("pers-imagem-input");
+    if (data.persImagem && data.persImagem.startsWith("data:")) {
+      // Ficha carregada tem imagem — exibe
+      if (img) { img.src = data.persImagem; img.style.display = "block"; }
+      if (ph)  ph.style.display = "none";
+    } else {
+      // Ficha carregada NÃO tem imagem — limpa qualquer imagem residual
+      // da ficha anterior (senão a imagem antiga fica "presa" na tela)
+      if (img) { img.src = ""; img.style.display = "none"; }
+      if (ph)  ph.style.display = "";
+      if (inp) inp.value = "";
+    }
   }
 
   // Atributos
