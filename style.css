@@ -8,6 +8,20 @@
 /* ── Variáveis & Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Transição cinematográfica de tema ──────────────────────────
+   Ao conectar/trocar de rudimento, o fundo, as bordas, o accent e o
+   brilho do h1 (tudo que é pintado pelas variáveis de cor: --bg,
+   --bg2, --bg3, --bg4, --border, --border2, --accent, --rud-prim,
+   --rud-sec etc.) muda de cor suavemente em 3s, em sincronia com o
+   crossfade da imagem de fundo (ver BG_FADE_MS no script.js).
+   Qualquer elemento que já declare sua própria transição (hover, foco
+   etc.) mantém a sua, pois seletores mais específicos sempre vencem
+   este fallback de baixa especificidade. */
+*, *::before, *::after {
+  transition: background-color 3s ease, border-color 3s ease,
+              color 3s ease, box-shadow 3s ease;
+}
+
 :root {
   --bg:        #111318;
   --bg2:       #1c1f26;
@@ -2142,18 +2156,15 @@ input:focus, select:focus, textarea:focus {
   background-position: center center;
   background-repeat: no-repeat;
   opacity: 0;
-  transition: opacity 1.8s ease;
+  transition: opacity 3s ease;
   will-change: opacity;
   mix-blend-mode: screen;
 }
-.bg-img.bg-pulse-in  { opacity: 0.18; }
-.bg-img.bg-pulse-out { opacity: 0 !important; animation: none; }
-.bg-img.bg-pulsing, .bg-pulsing { animation: bgPulse 7s ease-in-out infinite; }
-@keyframes bgPulse {
-  0%   { opacity: 0.07; }
-  50%  { opacity: 0.22; }
-  100% { opacity: 0.07; }
-}
+/* O "respirar" (pulso suave de opacidade) agora é controlado via JS
+   (requestAnimationFrame, ver bgIniciarPulso em script.js) em vez de uma
+   @keyframes CSS — isso evita o "reset" de fase que acontecia quando a
+   animação CSS assumia o controle a partir do seu próprio 0%, ignorando
+   onde o fade-in tinha parado. */
 
 /* ══ BACKGROUND ANIMADO ══ */
 #bg-layer {

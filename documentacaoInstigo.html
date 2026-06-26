@@ -414,18 +414,20 @@
     <div class="file-tree">
       <span class="folder">📁 instigo/</span><br>
       &nbsp;&nbsp;<span class="file">📄 index.html</span> &nbsp;<span class="note">— estrutura da página (HTML puro, ~760 linhas)</span><br>
-      &nbsp;&nbsp;<span class="file">🎨 style.css</span> &nbsp;<span class="note">— todo o visual (~2800 linhas)</span><br>
-      &nbsp;&nbsp;<span class="file">⚙️ script.js</span> &nbsp;<span class="note">— toda a lógica (~6900 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">🎨 style.css</span> &nbsp;<span class="note">— todo o visual (~2900 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">⚙️ script.js</span> &nbsp;<span class="note">— toda a lógica (~7400 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ default.png</span> &nbsp;<span class="note">— imagem de fundo quando nenhum rudimento está conectado</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ poder.png</span> &nbsp;<span class="note">— imagem de fundo do rudimento Poder</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ conhecimento.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ vida.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ prazer.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ desespero.png</span><br>
+      &nbsp;&nbsp;<span class="file">🖼️ justica.png</span><br>
       &nbsp;&nbsp;<span class="file">📄 documentacao.html</span> &nbsp;<span class="note">— este arquivo</span>
     </div>
 
     <div class="callout callout-warning">
-      <strong>Atenção:</strong> Os 3 arquivos principais (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e as imagens PNG precisam estar <strong>todos na mesma pasta</strong>. Se separar, a ficha quebra.
+      <strong>Atenção:</strong> Os 3 arquivos principais (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e as 7 imagens PNG (incluindo o <code>default.png</code>) precisam estar <strong>todos na mesma pasta</strong>. Se separar, a ficha quebra.
     </div>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -765,12 +767,51 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="tema">Tema Visual</h2>
 
-    <p>O tema muda automaticamente baseado no rudimento primário conectado. O rudimento secundário afeta as cores de detalhe (h2, h3, bordas).</p>
+    <p>O tema muda automaticamente baseado no rudimento primário conectado. O rudimento secundário afeta as cores de detalhe (h2, h3, bordas). A troca de tema acontece em duas frentes ao mesmo tempo: as <strong>cores</strong> (fundo, bordas, accent, brilho do h1) e a <strong>imagem de fundo</strong> — ambas em crossfade suave de 3 segundos, nunca instantâneo.</p>
+
+    <h3>Transição de cores</h3>
+    <p>Quando um rudimento é conectado ou trocado, <code>aplicarTemaRudimentos()</code> atualiza as variáveis CSS (<code>--bg</code>, <code>--border</code>, <code>--accent</code>, <code>--rud-prim</code> etc.) via <code>root.style.setProperty()</code>. A transição suave dessas cores não vem do JS — vem de uma regra global no topo do <code>style.css</code>:</p>
+
+    <pre><code><span class="kw">*</span>, <span class="kw">*::before</span>, <span class="kw">*::after</span> {
+  transition: background-color <span class="num">3s</span> ease, border-color <span class="num">3s</span> ease,
+              color <span class="num">3s</span> ease, box-shadow <span class="num">3s</span> ease;
+}</code></pre>
+
+    <div class="callout callout-info">
+      Essa regra é de <strong>baixíssima especificidade</strong> (seletor universal) — qualquer elemento que já declare sua própria <code>transition</code> (botões com hover, foco de input etc.) continua usando a dela normalmente, sem ficar lento. Só os elementos sem transição própria (fundo da página, bordas de painel, brilho do h1) herdam esse fade de 3s.
+    </div>
 
     <h3>Imagens de fundo</h3>
-    <p>Cada rudimento tem uma imagem de fundo que aparece pulsando com blend mode <code>screen</code> sobre o fundo escuro. Quando dois rudimentos estão conectados, as imagens alternam a cada 5 segundos.</p>
+    <p>O fundo usa <strong>duas camadas</strong> (<code>#bg-img-a</code> e <code>#bg-img-b</code>) sobrepostas com <code>mix-blend-mode: screen</code>. A imagem nunca troca "dentro" da camada visível — ela é sempre carregada na camada que está <em>oculta</em>, que então entra em crossfade enquanto a camada antiga sai. É assim que a troca nunca aparece como um corte seco, e o <code>default.png</code> nunca "volta" no meio de uma troca entre dois rudimentos.</p>
 
-    <p>Para trocar as imagens: substitua os arquivos PNG na pasta com os mesmos nomes (<code>poder.png</code>, <code>conhecimento.png</code>, etc.). O código em <code>script.js</code> no objeto <code>BG_IMAGENS</code> referencia os nomes dos arquivos.</p>
+    <table>
+      <thead><tr><th>Estado</th><th>Comportamento</th></tr></thead>
+      <tbody>
+        <tr><td>Nenhum rudimento</td><td>Mostra <code>default.png</code>, respirando (pulso de opacidade)</td></tr>
+        <tr><td>Só primário</td><td>Mostra a imagem do primário, respirando</td></tr>
+        <tr><td>Primário + secundário</td><td>Alterna entre as duas imagens, cada uma respirando enquanto está em destaque</td></tr>
+      </tbody>
+    </table>
+
+    <h4>O "respirar" (pulso de opacidade)</h4>
+    <p>A imagem em destaque sobe e desce de opacidade suavemente (entre ~7% e ~22%) o tempo todo. Esse efeito é controlado via <strong>JavaScript</strong> (<code>requestAnimationFrame</code>), não por uma <code>@keyframes</code> do CSS. O motivo: uma animação CSS sempre reinicia do seu próprio 0% quando é ligada, ignorando onde a imagem estava — isso causava um "reset" visível assim que o fade-in terminava. Calculando a fase inicial matematicamente, o pulso em JS começa exatamente no valor onde o fade-in parou, sem nenhum salto.</p>
+
+    <h4>Tempos</h4>
+    <table>
+      <thead><tr><th>Constante</th><th>Valor</th><th>O que controla</th></tr></thead>
+      <tbody>
+        <tr><td><code>BG_FADE_MS</code></td><td>3000 (3s)</td><td>Duração do crossfade entre duas imagens/cores quaisquer</td></tr>
+        <tr><td><code>BG_ALT_PRIM_MS</code></td><td>13000 (13s)</td><td>Tempo que o <strong>primário</strong> fica em destaque antes de trocar pro secundário</td></tr>
+        <tr><td><code>BG_ALT_SEC_MS</code></td><td>11000 (11s)</td><td>Tempo que o <strong>secundário</strong> fica em destaque antes de voltar pro primário</td></tr>
+        <tr><td><code>BG_PULSE_PERIOD</code></td><td>7000 (7s)</td><td>Duração de um ciclo completo do "respirar"</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <strong>Dica:</strong> Pra ajustar esses tempos, edite as constantes direto no início da seção <code>BACKGROUND ANIMADO</code> do <code>script.js</code>. O primário foi propositalmente deixado um pouco mais tempo em tela que o secundário (13s vs 11s).
+    </div>
+
+    <p>Para trocar as imagens: substitua os arquivos PNG na pasta com os mesmos nomes (<code>default.png</code>, <code>poder.png</code>, <code>conhecimento.png</code> etc.). O código em <code>script.js</code> no objeto <code>BG_IMAGENS</code> referencia os nomes dos arquivos.</p>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="estrutura-js">Estrutura do script.js</h2>
@@ -795,8 +836,8 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
         <tr><td>Inventário</td><td>2750–2900</td><td>Itens e armas</td></tr>
         <tr><td>RENDER INICIAL</td><td>4666–5135</td><td>Constrói o DOM no carregamento da página</td></tr>
         <tr><td>Catálogo browser</td><td>5035–5135</td><td>Renderiza o catálogo de habilidades</td></tr>
-        <tr><td>Background animado</td><td>6188–6380</td><td>Sistema de imagens de fundo</td></tr>
-        <tr><td>Save/Load</td><td>6380–6900</td><td>LocalStorage, export JSON, import</td></tr>
+        <tr><td>Background animado</td><td>6467–6740</td><td>Sistema de imagens de fundo: crossfade entre camadas, pulso via JS, alternância prim/sec com tempos assimétricos</td></tr>
+        <tr><td>Save/Load</td><td>6746–7350</td><td>LocalStorage, export JSON, import</td></tr>
       </tbody>
     </table>
 

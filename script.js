@@ -6491,12 +6491,65 @@ const BG_IMAGENS = {
   "Justiça":      "justica.png",
 };
 
+// ── Configuração de tempo ───────────────────────────────
+// Duração da transição cinematográfica ao trocar/conectar rudimento.
+// Mantida em sincronia com a transição de cores do tema (ver style.css).
+const BG_FADE_MS = 3000;
+
 // ── Estado interno ─────────────────────────────────────
-let _bgPrim = null;
-let _bgSec  = null;
-let _bgActiveLayer = "a";     // qual layer está na frente
+// (undefined, não null — assim a 1ª chamada bgAtualizar(null,null) é
+// detectada como "mudou" e a imagem default é de fato aplicada)
+let _bgPrim = undefined;
+let _bgSec  = undefined;
+let _bgActiveLayer = "a";     // qual layer está na frente (visível) agora
 let _bgAltTimer = null;       // timer de alternância prim↔sec
+let _bgPreloadTimer = null;   // timer do pré-carregamento durante alternância
 let _bgAlternando = false;    // se está em modo de alternância
+const _bgPulseTimers = { a: null, b: null }; // timers de "ligar o pulso" pendentes, por layer
+const _bgPulseRAF    = { a: null, b: null }; // loop de respiração ativo, por layer
+
+// ── "Respirar" via JS (em vez de @keyframes CSS) ───────────────────────
+// O motivo de não usar mais a animação CSS: uma vez que uma @keyframes
+// liga, ela TOMA o controle da opacidade a partir do seu próprio 0% —
+// ignorando completamente o valor onde o fade-in tinha parado (0.18).
+// Isso causava o "reset" visível: a imagem entrava suave até 18% e, no
+// instante em que o pulso ligava, caía de volta pra 7% (o 0% do keyframe).
+// Controlando a respiração quadro a quadro via requestAnimationFrame,
+// a função começa exatamente no MESMO valor (0.18) onde o fade-in parou
+// — sem descontinuidade nenhuma.
+const BG_PULSE_BASE   = 0.145;                                  // ponto médio do respirar (entre 0.07 e 0.22)
+const BG_PULSE_AMP    = 0.075;                                  // amplitude (0.145 ± 0.075 = 0.07..0.22)
+const BG_PULSE_PERIOD = 7000;                                   // duração de um ciclo completo, em ms
+const BG_PULSE_FASE0  = Math.asin((0.18 - BG_PULSE_BASE) / BG_PULSE_AMP); // fase inicial: opacidade 0.18, subindo
+
+function bgPararPulso(layerId) {
+  if (_bgPulseRAF[layerId]) {
+    cancelAnimationFrame(_bgPulseRAF[layerId]);
+    _bgPulseRAF[layerId] = null;
+  }
+}
+
+function bgIniciarPulso(layerId) {
+  const el = bgGetLayer(layerId);
+  if (!el) return;
+  bgPararPulso(layerId);
+  el.style.transition = "none"; // a respiração já é suave por si (senão cada frame tentaria animar)
+  const t0 = performance.now();
+  const tick = (agora) => {
+    const dt = agora - t0;
+    const fase = (2 * Math.PI * dt / BG_PULSE_PERIOD) + BG_PULSE_FASE0;
+    el.style.opacity = (BG_PULSE_BASE + BG_PULSE_AMP * Math.sin(fase)).toFixed(4);
+    _bgPulseRAF[layerId] = requestAnimationFrame(tick);
+  };
+  _bgPulseRAF[layerId] = requestAnimationFrame(tick);
+}
+
+function bgCancelarPulseTimer(layerId) {
+  if (_bgPulseTimers[layerId]) {
+    clearTimeout(_bgPulseTimers[layerId]);
+    _bgPulseTimers[layerId] = null;
+  }
+}
 
 // Filtro CSS para colorir a imagem na cor do rudimento
 function bgFiltroRudimento(rud) {
@@ -6508,6 +6561,10 @@ function bgGetLayer(id) {
   return document.getElementById("bg-img-" + id);
 }
 
+// Define a imagem (e filtro) de um layer. IMPORTANTE: só deve ser chamada
+// num layer que esteja oculto (opacity 0) — troca de background-image não
+// tem crossfade nativo no CSS, então mudar a imagem de um layer visível
+// causa um "pulo" instantâneo em vez de uma transição suave.
 function bgAplicarImagem(layerId, rud) {
   const el = bgGetLayer(layerId);
   if (!el) return;
@@ -6515,7 +6572,7 @@ function bgAplicarImagem(layerId, rud) {
   if (url) {
     el.style.backgroundImage = `url('${url}')`;
     el.style.filter = bgFiltroRudimento(rud);
-    el.dataset.rud = rud;
+    el.dataset.rud = rud || "";
   } else {
     el.style.backgroundImage = "none";
     el.style.filter = "";
@@ -6523,70 +6580,126 @@ function bgAplicarImagem(layerId, rud) {
   }
 }
 
+// Mostra (faz o fade-in de) um layer. O fade de opacidade SEMPRE acontece
+// de fato primeiro — só depois que ele termina é que o "respirar" (pulso)
+// é ligado, já começando exatamente em 0.18 (sem reset, ver bgIniciarPulso).
 function bgMostrarLayer(layerId, fadeIn, pulse) {
   const el = bgGetLayer(layerId);
   if (!el) return;
-  el.classList.remove("bg-pulsing");
+  bgCancelarPulseTimer(layerId);
+  bgPararPulso(layerId);
+
   if (fadeIn) {
+    el.style.transition = "none";
     void el.offsetWidth;
-    el.style.transition = "opacity 1.8s ease";
-    el.style.opacity = pulse ? "" : "0.18";
-    if (pulse) el.classList.add("bg-pulsing");
-    // force reflow then set opacity
+    el.style.transition = `opacity ${BG_FADE_MS}ms ease`;
     void el.offsetWidth;
-    if (!pulse) el.style.opacity = "0.18";
+    el.style.opacity = "0.18";
+    if (pulse) {
+      _bgPulseTimers[layerId] = setTimeout(() => {
+        bgIniciarPulso(layerId);
+        _bgPulseTimers[layerId] = null;
+      }, BG_FADE_MS);
+    }
   } else {
     el.style.transition = "none";
-    if (pulse) {
-      el.classList.add("bg-pulsing");
-    } else {
-      el.style.opacity = "0.18";
-    }
+    el.style.opacity = "0.18";
+    if (pulse) bgIniciarPulso(layerId);
   }
 }
 
+// Esconde (faz o fade-out de) um layer. Antes de parar o pulso, captura a
+// opacidade exata em que a respiração estava (pode estar em qualquer
+// ponto do ciclo) e a congela como ponto de partida, para que o fade-out
+// comece exatamente de onde a imagem estava — sem nenhum salto perceptível.
 function bgEsconderLayer(layerId, fade) {
   const el = bgGetLayer(layerId);
   if (!el) return;
-  el.classList.remove("bg-pulsing");
-  el.style.transition = fade ? "opacity 1.8s ease" : "none";
+  bgCancelarPulseTimer(layerId);
+
+  const opacidadeAtual = getComputedStyle(el).opacity;
+  bgPararPulso(layerId);
+  el.style.transition = "none";
+  el.style.opacity = opacidadeAtual;
+  void el.offsetWidth;
+
+  el.style.transition = fade ? `opacity ${BG_FADE_MS}ms ease` : "none";
   el.style.opacity = "0";
-  if (!fade) { el.style.backgroundImage = "none"; el.style.filter = ""; }
+  if (!fade) { el.style.backgroundImage = "none"; el.style.filter = ""; el.dataset.rud = ""; }
 }
 
+// Faz o crossfade real do estado atual (seja ele qual for: default, um
+// rudimento único, ou um dos dois lados da alternância) para a imagem de
+// "rud". Sempre escreve a nova imagem no layer que está oculto e nunca no
+// que está visível — por isso o "default" nunca volta a aparecer no meio
+// da troca: a imagem antiga só desaparece conforme a nova vai entrando.
+function bgCrossfadeParaImagem(rud) {
+  const frente = _bgActiveLayer;
+  const fundo  = frente === "a" ? "b" : "a";
+
+  bgAplicarImagem(fundo, rud);
+  bgMostrarLayer(fundo, true, true);
+  bgEsconderLayer(frente, true);
+
+  _bgActiveLayer = fundo;
+}
+
+// Tempo que cada rudimento fica em exibição antes de trocar pro outro.
+// O primário fica um tempinho a mais que o secundário em tela.
+const BG_ALT_PRIM_MS = 13000;
+const BG_ALT_SEC_MS  = 11000;
+
 function bgIniciarAlternancia() {
-  if (_bgAltTimer) clearInterval(_bgAltTimer);
+  if (_bgAltTimer) clearTimeout(_bgAltTimer);
+  if (_bgPreloadTimer) clearTimeout(_bgPreloadTimer);
   _bgAlternando = true;
+
+  // Crossfade do estado atual (default ou rudimento único) para o primário.
+  const frenteAnterior = _bgActiveLayer;
+  const fundo = frenteAnterior === "a" ? "b" : "a";
+
+  bgAplicarImagem(fundo, _bgPrim);
+  bgMostrarLayer(fundo, true, true);
+  bgEsconderLayer(frenteAnterior, true);
+  _bgActiveLayer = fundo;
+
   let showingPrim = true;
 
-  // Começa com prim visível
-  bgAplicarImagem("a", _bgPrim);
-  bgMostrarLayer("a", true, false);
-  bgAplicarImagem("b", _bgSec);
-  bgEsconderLayer("b", false);
-  _bgActiveLayer = "a";
+  // Pré-carrega o secundário no layer que acabou de ficar oculto, só depois
+  // que ele já estiver totalmente invisível (evita troca de imagem "no meio"
+  // de um fade, que causaria um pulo visível).
+  _bgPreloadTimer = setTimeout(() => bgAplicarImagem(frenteAnterior, _bgSec), BG_FADE_MS + 50);
 
-  _bgAltTimer = setInterval(() => {
-    if (showingPrim) {
-      // Troca para sec
-      bgAplicarImagem("b", _bgSec);
-      bgMostrarLayer("b", true, false);
-      setTimeout(() => bgEsconderLayer("a", true), 900);
-      _bgActiveLayer = "b";
-    } else {
-      // Troca para prim
-      bgAplicarImagem("a", _bgPrim);
-      bgMostrarLayer("a", true, false);
-      setTimeout(() => bgEsconderLayer("b", true), 900);
-      _bgActiveLayer = "a";
-    }
-    showingPrim = !showingPrim;
-  }, 5000);
+  // Agenda a próxima troca com setTimeout (em vez de setInterval) porque o
+  // tempo de exibição não é mais fixo: primário e secundário usam durações
+  // diferentes (BG_ALT_PRIM_MS / BG_ALT_SEC_MS), então cada troca precisa
+  // reagendar a si mesma com o tempo certo pro próximo lado.
+  const agendarProximaTroca = () => {
+    const tempoExibicao = showingPrim ? BG_ALT_PRIM_MS : BG_ALT_SEC_MS;
+    _bgAltTimer = setTimeout(() => {
+      const frenteAtual = _bgActiveLayer;
+      const oculto = frenteAtual === "a" ? "b" : "a";
+
+      bgMostrarLayer(oculto, true, true);
+      bgEsconderLayer(frenteAtual, true);
+      _bgActiveLayer = oculto;
+      showingPrim = !showingPrim;
+
+      // Pré-carrega, já invisível, o rudimento que vai entrar na próxima troca.
+      const proximoRud = showingPrim ? _bgSec : _bgPrim;
+      _bgPreloadTimer = setTimeout(() => bgAplicarImagem(frenteAtual, proximoRud), BG_FADE_MS + 50);
+
+      agendarProximaTroca();
+    }, tempoExibicao);
+  };
+  agendarProximaTroca();
 }
 
 function bgPararAlternancia() {
-  if (_bgAltTimer) clearInterval(_bgAltTimer);
+  if (_bgAltTimer) clearTimeout(_bgAltTimer);
+  if (_bgPreloadTimer) clearTimeout(_bgPreloadTimer);
   _bgAltTimer = null;
+  _bgPreloadTimer = null;
   _bgAlternando = false;
 }
 
@@ -6601,23 +6714,19 @@ function bgAtualizar(prim, sec) {
   bgPararAlternancia();
 
   if (!prim) {
-    // Nenhum rudimento — imagem default pulsando
-    bgAplicarImagem("a", "default");
-    bgMostrarLayer("a", true, true);
-    bgEsconderLayer("b", true);
+    // Nenhum rudimento — crossfade cinematográfico para a imagem default
+    bgCrossfadeParaImagem("default");
     return;
   }
 
   if (prim && sec) {
-    // Dois rudimentos — alternar a cada 5s
+    // Dois rudimentos — crossfade para o primário e inicia a alternância
     bgIniciarAlternancia();
     return;
   }
 
-  // Só primário — pulso com cor do prim
-  bgAplicarImagem("a", prim);
-  bgMostrarLayer("a", true, true);
-  bgEsconderLayer("b", primMudou);
+  // Só primário — crossfade cinematográfico para a imagem do rudimento
+  bgCrossfadeParaImagem(prim);
 }
 
 // Hook em aplicarTemaRudimentos
