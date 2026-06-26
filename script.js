@@ -6482,13 +6482,13 @@ const BG_GLOW_COLORS = {
 // Substitua os valores null pelas strings base64 quando tiver as imagens
 // Formato: "data:image/jpeg;base64,/9j/4AAQ..."
 const BG_IMAGENS = {
-  "default":      null,
+  "default":      "default.png",
   "Poder":        "poder.png",
   "Conhecimento": "conhecimento.png",
   "Vida":         "vida.png",
   "Prazer":       "prazer.png",
   "Desespero":    "desespero.png",
-  "Justiça":      null,
+  "Justiça":      "justica.png",
 };
 
 // ── Estado interno ─────────────────────────────────────
