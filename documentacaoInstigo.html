@@ -388,6 +388,18 @@
       </ol>
     </div>
 
+    <div class="card card-accent-yellow">
+      <h4 style="margin-top:0">📌 Atualizações Recentes</h4>
+      <ul style="padding-left:20px;color:var(--text2);font-size:.88em;line-height:1.9;">
+        <li><strong>Intimidação</strong> agora é subperícia de <strong>Determinação</strong> (era de Carisma).</li>
+        <li><strong>Perícias de Dedicação</strong> (Justiça) não têm mais especialização — só desbloqueios por PP.</li>
+        <li><strong>Especializações:</strong> Muito Bom agora é +3 e dá Vantagem; Muito Ruim agora é −3 e dá Desvantagem (antes eram +5/−5 sem vantagem/desvantagem).</li>
+        <li>Novo pool de <strong>PP de Dedicação</strong>: o que sobrar dos 8 PP/nível de Justiça pode virar fonte de PP para habilidades e feitiços.</li>
+        <li><strong>Editar</strong> habilidades e feitiços já adquiridos — realoque as fontes de PP sem precisar remover e recriar.</li>
+        <li>Remover uma habilidade agora <strong>devolve o PP gasto</strong> corretamente, de qualquer fonte (perícia, upagem ou Dedicação).</li>
+      </ul>
+    </div>
+
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="visao-geral">Visão Geral</h2>
 
@@ -413,21 +425,19 @@
 
     <div class="file-tree">
       <span class="folder">📁 instigo/</span><br>
-      &nbsp;&nbsp;<span class="file">📄 index.html</span> &nbsp;<span class="note">— estrutura da página (HTML puro, ~760 linhas)</span><br>
+      &nbsp;&nbsp;<span class="file">📄 index.html</span> &nbsp;<span class="note">— estrutura da página (HTML puro, ~770 linhas)</span><br>
       &nbsp;&nbsp;<span class="file">🎨 style.css</span> &nbsp;<span class="note">— todo o visual (~2900 linhas)</span><br>
-      &nbsp;&nbsp;<span class="file">⚙️ script.js</span> &nbsp;<span class="note">— toda a lógica (~7400 linhas)</span><br>
-      &nbsp;&nbsp;<span class="file">🖼️ default.png</span> &nbsp;<span class="note">— imagem de fundo quando nenhum rudimento está conectado</span><br>
+      &nbsp;&nbsp;<span class="file">⚙️ script.js</span> &nbsp;<span class="note">— toda a lógica (~7700 linhas)</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ poder.png</span> &nbsp;<span class="note">— imagem de fundo do rudimento Poder</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ conhecimento.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ vida.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ prazer.png</span><br>
       &nbsp;&nbsp;<span class="file">🖼️ desespero.png</span><br>
-      &nbsp;&nbsp;<span class="file">🖼️ justica.png</span><br>
       &nbsp;&nbsp;<span class="file">📄 documentacao.html</span> &nbsp;<span class="note">— este arquivo</span>
     </div>
 
     <div class="callout callout-warning">
-      <strong>Atenção:</strong> Os 3 arquivos principais (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e as 7 imagens PNG (incluindo o <code>default.png</code>) precisam estar <strong>todos na mesma pasta</strong>. Se separar, a ficha quebra.
+      <strong>Atenção:</strong> Os 3 arquivos principais (<code>index.html</code>, <code>style.css</code>, <code>script.js</code>) e as imagens PNG precisam estar <strong>todos na mesma pasta</strong>. Se separar, a ficha quebra.
     </div>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -517,17 +527,25 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     <table>
       <thead><tr><th>Especialização</th><th>Bônus</th><th>Limite</th></tr></thead>
       <tbody>
-        <tr><td>Muito Bom (MB)</td><td>+5</td><td>3 no total</td></tr>
+        <tr><td>Muito Bom (MB)</td><td>+3 <span class="badge badge-blue">Vantagem</span></td><td>3 no total</td></tr>
         <tr><td>Bom (B)</td><td>+3</td><td>7 no total</td></tr>
-        <tr><td>Ruim (R)</td><td>−3</td><td>3 no total</td></tr>
-        <tr><td>Muito Ruim (MR)</td><td>−5</td><td>2 no total</td></tr>
+        <tr><td>Ruim (R)</td><td>−3</td><td>4 no total</td></tr>
+        <tr><td>Muito Ruim (MR)</td><td>−3 <span class="badge badge-red">Desvantagem</span></td><td>2 no total</td></tr>
       </tbody>
     </table>
+
+    <div class="callout callout-tip">
+      <strong>Vantagem/Desvantagem automática:</strong> ao escolher uma subperícia/especialização para rolar na <a href="#calculadora">Calculadora de Dados</a>, se ela for <strong>Muito Bom</strong> o rádio "Vant." é marcado sozinho; se for <strong>Muito Ruim</strong>, marca "Desv." automaticamente. O jogador ainda pode trocar manualmente depois, se a cena pedir outro motivo para vantagem/desvantagem.
+    </div>
+
+    <div class="callout callout-warning">
+      <strong>Perícias de Dedicação (Justiça) não têm especialização.</strong> Financeiro, Performance, Adestramento, Medicina, Dirigir, Pedagogia e Mecânica não recebem MB/B/R/MR — suas subperícias (ex: "Animais selvagens", "Pilotáveis Pesados") são apenas desbloqueios por PP investido, sem seletor de especialização nem bônus/penalidade.
+    </div>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="pp">Pontos de Progressão (PP)</h2>
 
-    <p>PP são a "moeda" do sistema. Existem três pools distintos:</p>
+    <p>PP são a "moeda" do sistema. Existem quatro pools distintos:</p>
 
     <div class="card card-accent-blue">
       <h4 style="margin-top:0">1. PP de Nível 1 (livres por atributo)</h4>
@@ -548,17 +566,33 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
       <code>ppUpagemDisponivel()</code> — calcula o saldo livre
     </div>
 
+    <div class="card" style="border-left:3px solid var(--text)">
+      <h4 style="margin-top:0">4. PP de Dedicação (Justiça)</h4>
+      <p>Cada nível de Justiça com bônus de Dedicação concede <strong>8 PP</strong> que normalmente vão para as 7 perícias de Justiça (Financeiro, Performance, Adestramento, Medicina, Dirigir, Pedagogia, Mecânica). O jogador <strong>não precisa distribuir os 8 inteiros</strong> — o que sobrar (campo "Restantes: X / 8") fica disponível como fonte "PP de Dedicação" para habilidades e feitiços, exatamente como o Pool de Upagem.</p>
+      <code>progState.ppDedPool[rud][nivel][pericia]</code> — alocação por nível<br>
+      <code>ppDedDisponivel()</code> — calcula o saldo livre (não distribuído em nenhuma perícia, nem usado em habilidade/feitiço)
+    </div>
+
+    <div class="callout callout-info">
+      A distribuição feita em cada nível (o "Restantes: X / 8" daquele nível especificamente) <strong>nunca é desfeita automaticamente</strong> — ela é o registro histórico de onde o jogador decidiu investir aqueles 8 PP. Quando uma habilidade consome parte do valor de uma perícia que tinha PP de Dedicação investido (via fonte "PP de Perícia"), apenas o <em>valor efetivo</em> da perícia cai (a perícia fica mais fraca, igual já acontece ao gastar PP de Upagem investido); o registro "X/8" daquele nível continua mostrando a mesma distribuição original.
+    </div>
+
     <h3>Fontes de PP nas Habilidades e Feitiços</h3>
-    <p>Ao adquirir uma habilidade ou feitiço, o jogador precisa declarar de onde vêm os PP. Há três opções:</p>
+    <p>Ao adquirir uma habilidade ou feitiço, o jogador precisa declarar de onde vêm os PP. Há quatro opções:</p>
 
     <table>
       <thead><tr><th>Tipo de fonte</th><th>Valor no código</th><th>Descrição</th></tr></thead>
       <tbody>
         <tr><td>PP de Upagem</td><td><code>tipo: "upagem"</code></td><td>Do pool de upagem livre</td></tr>
+        <tr><td>PP de Dedicação</td><td><code>tipo: "ppded"</code></td><td>Do saldo não distribuído do pool de Justiça (8 PP/nível)</td></tr>
         <tr><td>PP Livres do atributo</td><td><code>tipo: "livre", atrib: "Poder"</code></td><td>Do pool de nível 1 não usado</td></tr>
-        <tr><td>PP de Perícia</td><td><code>tipo: "pericia", pericia: "Atletismo"</code></td><td>De uma perícia específica</td></tr>
+        <tr><td>PP de Perícia</td><td><code>tipo: "pericia", pericia: "Atletismo"</code></td><td>De uma perícia específica — conta base + progressão + Dedicação já investidos nela</td></tr>
       </tbody>
     </table>
+
+    <div class="callout callout-tip">
+      <strong>Editando e removendo:</strong> tanto habilidades quanto feitiços têm um botão <strong>Editar</strong> na lista, que reabre o formulário com as fontes de PP já preenchidas para realocar. Remover uma habilidade ou feitiço <strong>devolve todo o PP gasto</strong> automaticamente, seja qual for a fonte original. Veja mais em <a href="#aba-habilidades">Habilidades</a> e <a href="#aba-feiticos">Feitiços</a>.
+    </div>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="progressao">Progressão de Nível</h2>
@@ -684,6 +718,18 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     <h3>Efeitos automáticos</h3>
     <p>Algumas habilidades do catálogo têm efeitos que se aplicam automaticamente à ficha (ex: +1 Defesa, bônus em subperícas específicas). Quando isso acontece, um aviso em verde confirma a aplicação.</p>
 
+    <h3>Editando uma habilidade já adquirida</h3>
+    <p>Cada habilidade na lista tem um botão <strong>Editar</strong> além do <strong>×</strong> de remover. Ao clicar:</p>
+    <ol class="steps">
+      <li>O formulário no topo da aba muda para modo edição (título e botão mudam para "Salvar Edição"), pré-preenchido com nome, descrição, tipo e fontes de PP atuais.</li>
+      <li>O PP que essa habilidade já tinha investido fica novamente disponível para realocar — nas mesmas fontes ou em outras (ex: trocar "PP de Perícia: Dirigir" por "PP de Upagem").</li>
+      <li>Clique em <strong>Salvar Edição</strong> para confirmar, ou <strong>Cancelar Edição</strong> para descartar (nada é alterado até salvar).</li>
+    </ol>
+    <p style="font-size:.88em;">Habilidades adquiridas de graça por progressão (badge "Grátis") também podem ter nome/descrição editados, mas não exigem PP.</p>
+
+    <h3>Removendo uma habilidade</h3>
+    <p>Ao remover, <strong>todo o PP gasto é devolvido</strong> automaticamente para a(s) fonte(s) original(is) — perícia, progressão ou Dedicação — não importa de onde veio. Se a habilidade tinha um efeito aplicado na ficha (ex: bônus de Defesa), o efeito também é desfeito.</p>
+
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="aba-feiticos">Aba: Feitiços</h2>
 
@@ -709,6 +755,9 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
 
     <h3>Organização</h3>
     <p>Os feitiços são organizados por rudimento em tabs na parte superior da aba. A tab "Todos" mostra todos juntos.</p>
+
+    <h3>Editando e removendo</h3>
+    <p>Cada feitiço tem botões <strong>Editar</strong> e <strong>× Remover</strong>. Editar reabre o mesmo modal de criação com todos os campos e fontes de PP preenchidos, prontos para alterar. Remover devolve o PP gasto automaticamente, qualquer que tenha sido a fonte.</p>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="aba-anotacoes">Aba: Anotações</h2>
@@ -762,56 +811,17 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     </div>
 
     <h3>O que é salvo</h3>
-    <p>O JSON exportado contém: atributos, perícias, PP, pools de upagem, stats (PV/PM/TE atual e máximo), progressão de nível, escolhas, habilidades, feitiços, inventário, armas e anotações.</p>
+    <p>O JSON exportado contém: atributos, perícias, PP (upagem, progressão e Dedicação), stats (PV/PM/TE atual e máximo), progressão de nível, escolhas, habilidades, feitiços, inventário, armas e anotações.</p>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="tema">Tema Visual</h2>
 
-    <p>O tema muda automaticamente baseado no rudimento primário conectado. O rudimento secundário afeta as cores de detalhe (h2, h3, bordas). A troca de tema acontece em duas frentes ao mesmo tempo: as <strong>cores</strong> (fundo, bordas, accent, brilho do h1) e a <strong>imagem de fundo</strong> — ambas em crossfade suave de 3 segundos, nunca instantâneo.</p>
-
-    <h3>Transição de cores</h3>
-    <p>Quando um rudimento é conectado ou trocado, <code>aplicarTemaRudimentos()</code> atualiza as variáveis CSS (<code>--bg</code>, <code>--border</code>, <code>--accent</code>, <code>--rud-prim</code> etc.) via <code>root.style.setProperty()</code>. A transição suave dessas cores não vem do JS — vem de uma regra global no topo do <code>style.css</code>:</p>
-
-    <pre><code><span class="kw">*</span>, <span class="kw">*::before</span>, <span class="kw">*::after</span> {
-  transition: background-color <span class="num">3s</span> ease, border-color <span class="num">3s</span> ease,
-              color <span class="num">3s</span> ease, box-shadow <span class="num">3s</span> ease;
-}</code></pre>
-
-    <div class="callout callout-info">
-      Essa regra é de <strong>baixíssima especificidade</strong> (seletor universal) — qualquer elemento que já declare sua própria <code>transition</code> (botões com hover, foco de input etc.) continua usando a dela normalmente, sem ficar lento. Só os elementos sem transição própria (fundo da página, bordas de painel, brilho do h1) herdam esse fade de 3s.
-    </div>
+    <p>O tema muda automaticamente baseado no rudimento primário conectado. O rudimento secundário afeta as cores de detalhe (h2, h3, bordas).</p>
 
     <h3>Imagens de fundo</h3>
-    <p>O fundo usa <strong>duas camadas</strong> (<code>#bg-img-a</code> e <code>#bg-img-b</code>) sobrepostas com <code>mix-blend-mode: screen</code>. A imagem nunca troca "dentro" da camada visível — ela é sempre carregada na camada que está <em>oculta</em>, que então entra em crossfade enquanto a camada antiga sai. É assim que a troca nunca aparece como um corte seco, e o <code>default.png</code> nunca "volta" no meio de uma troca entre dois rudimentos.</p>
+    <p>Cada rudimento tem uma imagem de fundo que aparece pulsando com blend mode <code>screen</code> sobre o fundo escuro. Quando dois rudimentos estão conectados, as imagens alternam a cada 5 segundos.</p>
 
-    <table>
-      <thead><tr><th>Estado</th><th>Comportamento</th></tr></thead>
-      <tbody>
-        <tr><td>Nenhum rudimento</td><td>Mostra <code>default.png</code>, respirando (pulso de opacidade)</td></tr>
-        <tr><td>Só primário</td><td>Mostra a imagem do primário, respirando</td></tr>
-        <tr><td>Primário + secundário</td><td>Alterna entre as duas imagens, cada uma respirando enquanto está em destaque</td></tr>
-      </tbody>
-    </table>
-
-    <h4>O "respirar" (pulso de opacidade)</h4>
-    <p>A imagem em destaque sobe e desce de opacidade suavemente (entre ~7% e ~22%) o tempo todo. Esse efeito é controlado via <strong>JavaScript</strong> (<code>requestAnimationFrame</code>), não por uma <code>@keyframes</code> do CSS. O motivo: uma animação CSS sempre reinicia do seu próprio 0% quando é ligada, ignorando onde a imagem estava — isso causava um "reset" visível assim que o fade-in terminava. Calculando a fase inicial matematicamente, o pulso em JS começa exatamente no valor onde o fade-in parou, sem nenhum salto.</p>
-
-    <h4>Tempos</h4>
-    <table>
-      <thead><tr><th>Constante</th><th>Valor</th><th>O que controla</th></tr></thead>
-      <tbody>
-        <tr><td><code>BG_FADE_MS</code></td><td>3000 (3s)</td><td>Duração do crossfade entre duas imagens/cores quaisquer</td></tr>
-        <tr><td><code>BG_ALT_PRIM_MS</code></td><td>13000 (13s)</td><td>Tempo que o <strong>primário</strong> fica em destaque antes de trocar pro secundário</td></tr>
-        <tr><td><code>BG_ALT_SEC_MS</code></td><td>11000 (11s)</td><td>Tempo que o <strong>secundário</strong> fica em destaque antes de voltar pro primário</td></tr>
-        <tr><td><code>BG_PULSE_PERIOD</code></td><td>7000 (7s)</td><td>Duração de um ciclo completo do "respirar"</td></tr>
-      </tbody>
-    </table>
-
-    <div class="callout callout-tip">
-      <strong>Dica:</strong> Pra ajustar esses tempos, edite as constantes direto no início da seção <code>BACKGROUND ANIMADO</code> do <code>script.js</code>. O primário foi propositalmente deixado um pouco mais tempo em tela que o secundário (13s vs 11s).
-    </div>
-
-    <p>Para trocar as imagens: substitua os arquivos PNG na pasta com os mesmos nomes (<code>default.png</code>, <code>poder.png</code>, <code>conhecimento.png</code> etc.). O código em <code>script.js</code> no objeto <code>BG_IMAGENS</code> referencia os nomes dos arquivos.</p>
+    <p>Para trocar as imagens: substitua os arquivos PNG na pasta com os mesmos nomes (<code>poder.png</code>, <code>conhecimento.png</code>, etc.). O código em <code>script.js</code> no objeto <code>BG_IMAGENS</code> referencia os nomes dos arquivos.</p>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="estrutura-js">Estrutura do script.js</h2>
@@ -821,25 +831,29 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     <table>
       <thead><tr><th>Seção</th><th>Linhas ~</th><th>Conteúdo</th></tr></thead>
       <tbody>
-        <tr><td>Tema e cores</td><td>1–115</td><td><code>ATRIB_COLORS</code>, <code>aplicarTemaRudimentos()</code>, <code>blendColor()</code></td></tr>
-        <tr><td>Atributos e exibição</td><td>115–165</td><td><code>ATRIBUTOS</code>, <code>ATRIB_DISPLAY</code>, <code>PERICIAS_POR_ATRIBUTO</code></td></tr>
-        <tr><td>Subperícas e especializações</td><td>166–530</td><td>Lógica de MB/B/R/MR, subperícas fixas e livres</td></tr>
-        <tr><td>Cálculos de ficha</td><td>530–860</td><td>PV, PM, TE, Defesa, Conforto, ranking</td></tr>
-        <tr><td>Atributos (drag & drop)</td><td>633–795</td><td>Ordenação visual dos blocos</td></tr>
-        <tr><td>PP e perícias</td><td>795–1090</td><td>Distribuição de pontos, limites, progressão</td></tr>
-        <tr><td>UI principal (<code>atualizarUI</code>)</td><td>1089–1260</td><td>Re-renderiza toda a interface</td></tr>
-        <tr><td>Calculadora de dados</td><td>1260–1750</td><td>Modal, rolagens, histórico, pin</td></tr>
-        <tr><td>Progressão de nível</td><td>1749–2125</td><td><code>progState</code>, popup de upagem, bônus</td></tr>
-        <tr><td>Catálogo de habilidades</td><td>1773–2125</td><td>Toda a base de habilidades do sistema</td></tr>
-        <tr><td>Habilidades</td><td>2125–2450</td><td>Form, fontes de PP, confirmar, efeitos</td></tr>
-        <tr><td>Feitiços</td><td>2450–2750</td><td>Modal, dados, fontes, salvar, remover</td></tr>
-        <tr><td>Inventário</td><td>2750–2900</td><td>Itens e armas</td></tr>
-        <tr><td>RENDER INICIAL</td><td>4666–5135</td><td>Constrói o DOM no carregamento da página</td></tr>
-        <tr><td>Catálogo browser</td><td>5035–5135</td><td>Renderiza o catálogo de habilidades</td></tr>
-        <tr><td>Background animado</td><td>6467–6740</td><td>Sistema de imagens de fundo: crossfade entre camadas, pulso via JS, alternância prim/sec com tempos assimétricos</td></tr>
-        <tr><td>Save/Load</td><td>6746–7350</td><td>LocalStorage, export JSON, import</td></tr>
+        <tr><td>Dados estáticos</td><td>110–300</td><td><code>ATRIBUTOS</code>, <code>ATRIB_DISPLAY</code>, <code>PERICIAS_POR_ATRIBUTO</code>, <code>SUBPERICIAS_FIXAS</code>, <code>SUBPERICIAS_DEDICACAO</code></td></tr>
+        <tr><td>Estado global</td><td>302–345</td><td>Atributos, perícias, PP, especializações, fontes temporárias</td></tr>
+        <tr><td>Especializações</td><td>376–457</td><td>MB/B/R/MR, <code>modEspecPorNome</code>, <code>tipoEspecPorNome</code> (vantagem/desvantagem)</td></tr>
+        <tr><td>Cálculos de Dedicação (Justiça)</td><td>879–1062</td><td>Níveis, subperícias desbloqueadas (sem especialização)</td></tr>
+        <tr><td>UI principal (<code>atualizarUI</code>)</td><td>1064–1220</td><td>Re-renderiza toda a interface</td></tr>
+        <tr><td>Calculadora de dados</td><td>1255–1750</td><td>Modal, rolagens, vantagem/desvantagem automática, histórico, pin</td></tr>
+        <tr><td>Bônus por conexão / Progressão</td><td>2400–2560</td><td><code>progState</code>, bônus por nível de rudimento</td></tr>
+        <tr><td>PP de Dedicação (pool dinâmico)</td><td>3078–3565</td><td><code>totalPPDedPorPericia</code>, <code>ppDedDisponivel</code>, "Restantes: X/8"</td></tr>
+        <tr><td>Catálogo de habilidades</td><td>3868–4404</td><td>Toda a base de habilidades do sistema</td></tr>
+        <tr><td>Popup de Upagem</td><td>4405–4905</td><td>Distribuição de PP de nível, escolhas, PP de Justiça</td></tr>
+        <tr><td>Habilidades</td><td>4905–5566</td><td>Form, fontes de PP, <code>confirmarHabilidade</code>, <code>habEditar</code>, <code>removerHabilidade</code>, efeitos</td></tr>
+        <tr><td>Feitiços</td><td>5567–5986</td><td>Modal, dados, fontes de PP, <code>salvarFeitico</code>, <code>removerFeiticoQualquer</code></td></tr>
+        <tr><td>Efeitos de habilidades na ficha</td><td>5987–6456</td><td>Registry <code>HAB_EFFECTS</code>, Alinhado pelo Meio</td></tr>
+        <tr><td>Inventário</td><td>6515–6710</td><td>Itens e armas</td></tr>
+        <tr><td>Background animado</td><td>6728–7005</td><td>Sistema de imagens de fundo por rudimento</td></tr>
+        <tr><td>Save/Load</td><td>7006–7420</td><td>LocalStorage, export JSON, import</td></tr>
+        <tr><td>Anotações</td><td>7615 em diante</td><td>Abas de texto livre</td></tr>
       </tbody>
     </table>
+
+    <div class="callout callout-info">
+      Os números de linha acima são aproximados e mudam conforme o código cresce — use a busca do editor (<code>Ctrl+F</code>) pelo nome da função ou pelo comentário de seção (ex: <code>// HABILIDADES</code>) para achar o trecho exato.
+    </div>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="dados-estado">Dados & Estado Global</h2>
@@ -858,9 +872,19 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
 <span class="comment">// PP de upagem ainda não distribuídos (pool livre)</span>
 <span class="kw">let</span> ppUpagemPool = <span class="num">0</span>;
 
-<span class="comment">// PP gastos em habilidades por perícia</span>
-<span class="kw">const</span> ppGastoHabilidades = {};
-<span class="kw">const</span> ppGastoHabilidadesProg = {};
+<span class="comment">// PP gastos em habilidades por perícia — deduzidos de pericias[]/ppProgressao[]/
+// progState.ppDedPool e devolvidos com precisão ao remover/editar a habilidade</span>
+<span class="kw">const</span> ppGastoHabilidades = {};      <span class="comment">// gasto vindo da base (nível 1)</span>
+<span class="kw">const</span> ppGastoHabilidadesProg = {};  <span class="comment">// gasto vindo de PP de upagem</span>
+<span class="kw">const</span> ppGastoHabilidadesDed = {};   <span class="comment">// gasto vindo de PP de Dedicação (Justiça)</span>
+
+<span class="comment">// Edição de habilidade em andamento (null = formulário em modo "nova")</span>
+<span class="kw">let</span> _habEditId = <span class="kw">null</span>;
+<span class="kw">let</span> _habEditOriginalFontes = <span class="kw">null</span>; <span class="comment">// snapshot das fontes antes de editar</span>
+
+<span class="comment">// Cada fonte de PP do tipo "pericia" guarda o split exato da dedução, para
+// poder devolver com precisão ao remover/editar:
+// { tipo:"pericia", pericia:"Dirigir", pp:3, dedProg:1, dedJustica:1, dedBase:1 }</span>
 
 <span class="comment">// Estado de progressão</span>
 <span class="kw">const</span> progState = {
@@ -869,6 +893,7 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
   nivelPrimario: <span class="num">1</span>,
   nivelSecundario: <span class="num">1</span>,
   escolhas: { prim: [], sec: [] },
+  ppDedPool: { prim: {}, sec: {} }, <span class="comment">// { nivel: { pericia: pontos } } — 8 PP/nível de Justiça</span>
   pfPV: <span class="num">0</span>, pfPM: <span class="num">0</span>, pfTE: <span class="num">0</span>, pfPP: <span class="num">0</span>,
 };
 
