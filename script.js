@@ -5502,6 +5502,10 @@ function confirmarHabilidade() {
   habFontesTemp = [];
   habResetFormUI();
 
+  // O valor efetivo de alguma perícia pode ter mudado (fonte "PP de Perícia"
+  // consumiu parte do seu valor) — recalcula o piso de "Alinhado pelo Meio" se ativo.
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
+
   atualizarUI();
   renderHabLista();
   renderHabFontes();
@@ -6385,6 +6389,11 @@ function removerHabilidade(id) {
   }
 
   habilidades.splice(idx, 1);
+
+  // O valor efetivo da perícia voltou a subir com a devolução do PP — recalcula
+  // o piso de "Alinhado pelo Meio" se ativo.
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
+
   atualizarUI();
   renderHabLista();
   renderHabFontes();
