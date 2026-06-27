@@ -1789,7 +1789,7 @@ const CATALOGO_HABILIDADES = {
         { nome: `WAR IS NEVER AN OPTION:`, descricao: `Recebe vantagem nos testes de Agarrar contra um alvo hostil. Além disso, por uma vez no dia para 4 níveis de Vida seu, pode aumentar o valor do seu dado de Agarrar em 1; isso pode fazer o resultado deixar de ser falha crítica, ou torná-lo um sucesso crítico.` },
         { nome: `PELE IMPENETRÁVEL:`, descricao: `Ao subir de nível no seu Rudimento Secundário, receba +1 Defesa.` },
         { nome: `TÔ SEMPRE COM RAIVA:`, descricao: `Quando fizer uma rolagem de ataque, recebe +1 no teste de ataque para cada 5 PV perdidos e +1 para cada 8 PE acumulados.` },
-        { nome: `MORTAL IMORTAL I:`, descricao: `Sempre que um adversário ficar com 0 PV em um poder antes de você, receba 1 PV temporário, mais um para cada 2 níveis de Vida seu. Ao sofrer dano, perca primeiro os PV temporários. Ao final do poder, perca todos os PV temporários que te restarem (mesmo que você continue envenenado, queimando etc).` },
+        { nome: `MORTAL IMORTAL I:`, descricao: `Sempre que um adversário ficar com 0 PV em um combate antes de você, receba 1 PV temporário, mais um para cada 2 níveis de Vida seu. Ao sofrer dano, perca primeiro os PV temporários. Ao final do combate, perca todos os PV temporários que te restarem (mesmo que você continue envenenado, queimando etc).` },
         { nome: `SOBREVIVENTE:`, descricao: `Possui uma opção extra de reação:
 Redirecionar: Pode tentar fazer o ataque que fora desferido em você atinja outro ser ao seu redor (ao alcance de corpo-a-corpo). O ser ao qual você quer redirecionar o ataque deve fazer um teste de Carregar/Levantar Peso contra sua Acrobacia. Em caso de empate, você perde.` },
         { nome: `GRANDALHÃO:`, descricao: `Ao subir de nível, receba 3PV bônus.` },
@@ -1799,18 +1799,18 @@ Redirecionar: Pode tentar fazer o ataque que fora desferido em você atinja outr
       "1": [
         { nome: `O MELHOR ATAQUE É A DEFESA:`, descricao: `Ao absorver todo o dano de um ataque, pode fazer um teste de intimidação contra o atacante. Em caso de sucesso, o alvo não pode fazer ações principais em seu próximo turno, e apenas pode fazer ações de movimento se forem se afastando de você.` },
         { nome: `ATROPELAR:`, descricao: `Ao realizar um ataque desarmado, pode usar sua A.M. para investir em linha reta até 5 metros contra o alvo de seu ataque. Os seres no caminho devem fazer um teste de esquiva com dificuldade igual à sua classe de acerto no ataque desarmado que acabou de fazer. No caso de falha, cada ser recebe dano equivalente a um soco seu. Se esbarrar numa parede, confira o dano de um soco novamente ao ser atacado.` },
-        { nome: `MORTAL IMORTAL II:`, descricao: `Sempre que um adversário ficar com 0 PV em um poder antes de você, receba 1 PV temporário para cada nível de Vida seu. Ao sofrer dano, perca primeiro os PV temporários. Ao final do poder, perca todos os PV temporários que te restarem (mesmo que você continue envenenado, queimando etc).` },
+        { nome: `MORTAL IMORTAL II:`, descricao: `Sempre que um adversário ficar com 0 PV em um combate antes de você, receba 1 PV temporário para cada nível de Vida seu. Ao sofrer dano, perca primeiro os PV temporários. Ao final do combate, perca todos os PV temporários que te restarem (mesmo que você continue envenenado, queimando etc).` },
         { nome: `MARATONISTA:`, descricao: `Se utilizar sua ação principal E sua ação de movimento para se mover, pode se mover pelo dobro da distância que percorreria. Para cada turno consecutivo que você utilizar essa habilidade, após parar de correr, você deve ficar um turno com a condição "Paralisado" devido à exaustão.` },
-        { nome: `AUTOPRESERVAÇÃO:`, descricao: `Caso não receba dano algum durante um poder, reduza 2d4 PE.` },
-        { nome: `PEITA EU:`, descricao: `Enquanto estiver em um poder, a cada inimigo adjacente ao seu personagem, some +2 em seu valor de Defesa até ele deixar de ser uma ameaça.` },
+        { nome: `AUTOPRESERVAÇÃO:`, descricao: `Caso não receba dano algum durante um combate, reduza 2d4 PE.` },
+        { nome: `PEITA EU:`, descricao: `Enquanto estiver em um combate, a cada inimigo adjacente ao seu personagem, some +2 em seu valor de Defesa até ele deixar de ser uma ameaça.` },
         { nome: `ARRASTAR:`, descricao: `Quando acertar um ataque corpo a corpo por pelo menos 1 classe de acerto a mais do que a dificuldade, pode empurrar o alvo do ataque em 2m para cada classe de acerto acima. Acertos críticos permitem empurrar o alvo até 4m a mais.` },
         { nome: `ABALAR:`, descricao: `Ao acertar um alvo com um dano de impacto, ele perde uma de suas próximas reações.` },
       ],
       "2": [
-        { nome: `SALTO ORNAMENTAL:`, descricao: `Como ação livre, uma vez por cada adversário em poder, pode saltar por cima de algum alvo que esteja a distância de corpo a corpo de você. Logo em seguida, se o atacar, ele deve fazer um teste de Prontidão contra sua Acrobacia. Em caso de vitória sua, o alvo não tem direito a reação contra esse ataque.` },
+        { nome: `SALTO ORNAMENTAL:`, descricao: `Como ação livre, uma vez por cada adversário em combate, pode saltar por cima de algum alvo que esteja a distância de corpo a corpo de você. Logo em seguida, se o atacar, ele deve fazer um teste de Prontidão contra sua Acrobacia. Em caso de vitória sua, o alvo não tem direito a reação contra esse ataque.` },
         { nome: `HOJE O COMBATE SERÁ NA MESA!:`, descricao: `Só pode ser adquirida em mesas presenciais. Sempre que tiver que fazer um teste de ataque ou reação, pode optar não fazer uma rolagem, e ao invés disso decidir o resultado em uma guerra de polegares com le Instrute.` },
         { nome: `ATLETA TREINADO:`, descricao: `Possui 1 Ação de Movimento a mais por turno para cada 5 níveis de Vida seu (arredondado para cima).` },
-        { nome: `PELE DE AÇO:`, descricao: `Uma vez por poder para cada 5 níveis de Vida seus, quando rolar um acerto crítico em "Absorver", absorve o dano completo.` },
+        { nome: `PELE DE AÇO:`, descricao: `Uma vez por combate para cada 5 níveis de Vida seus, quando rolar um acerto crítico em "Absorver", absorve o dano completo.` },
         { nome: `MAGO MAROMBA:`, descricao: `Ao usar Absorver em um ataque que possa ser absorvido, pode gastar 4PM para aumentar em 1 a sua defesa.` },
         { nome: `O MELHOR ATAQUE É A DEFESA II:`, descricao: `Recebe uma reação extra por turno, que pode ser utilizada apenas para Absorver.
 Ao absorver todo o dano de um ataque, pode fazer um teste de Intimidação com vantagem contra o atacante. Em caso de empate ou sucesso, o alvo fica Apavorado. Ao rolar o dado do Apavorado, se for ímpar, pode rolar novamente (porém, se rolar novamente, deve ficar com o segundo resultado).` },
@@ -1831,7 +1831,7 @@ Ao absorver todo o dano de um ataque, pode fazer um teste de Intimidação com v
 • Não pode utilizar armas de longo alcance;
 • Recebe uma penalidade de -10 para qualquer ataque. A cada ataque, a penalidade se reduz em 2 (-8 no segundo turno, -6 no terceiro...);
 • Não pode utilizar magias enquanto estiver em Frenesi.
-O estado de Frenesi se encerra automaticamente se você ficar desacordado, sair do estado Queimando ou após o fim do poder.
+O estado de Frenesi se encerra automaticamente se você ficar desacordado, sair do estado Queimando ou após o fim do combate.
 Se for alvo de dano de fogo ou magia do Rudimento de Poder, faça um teste de Resistência ao Calor contra a fonte do ataque; em caso de falha, você sai do estado de Frenesi e só pode entrar nele novamente no próximo turno.` },
       ],
       "1": [
@@ -1840,7 +1840,7 @@ Se for alvo de dano de fogo ou magia do Rudimento de Poder, faça um teste de Re
         { nome: `CHÁ DE ERVAS:`, descricao: `A cada 12h, tendo os ingredientes necessários, pode fazer um teste de Acampamento para fazer um chá de ervas curativas. Cada chaleira rende 2d3 porções, que curam 1d4 PV a cada 5 no resultado do teste.` },
         { nome: `DESARMAR:`, descricao: `Ao usar a ação "contra-ataque", pode atacar a arma do oponente. Em caso de sucesso, seu oponente não recebe dano, mas a arma dele cai no chão.` },
         { nome: `SURTO DE ADRENALINA:`, descricao: `Se algum indivíduo a até 20 metros de distância de você entrar na condição "morrendo", você recebe +10 nos testes de "Carregar Peso", "Corrida" e "Resistência" relacionados a salvar/proteger o alvo, até que ele morra ou se estabilize.` },
-        { nome: `MEDICINA MILITAR:`, descricao: `Enquanto estiver em poder, valem todos:
+        { nome: `MEDICINA MILITAR:`, descricao: `Enquanto estiver em combate, valem todos:
 • Se ume aliade ficar com 0 PV ou menos (e você perceber):
   ◦ Você DEVE usar suas próximas ações para tentar salvá-le, até que seja bem-sucedido ou ele de fato morra;
   ◦ Recebe vantagem nos testes OU de Atletismo para se aproximar de aliade, OU de Primeiros Socorros para estabilizá-le;
@@ -1848,10 +1848,10 @@ Se for alvo de dano de fogo ou magia do Rudimento de Poder, faça um teste de Re
 • Sempre que tentar recuperar PV de ume aliade, sua margem de crítico diminui em 2 e seu resultado é considerado uma classe de sucesso a mais do que o que for rolado (por exemplo, se tirar 15 no teste de Medicina, considere a cura de um resultado 20).` },
       ],
       "2": [
-        { nome: `GOLEM DE SEGURANÇA:`, descricao: `Ao estar em um poder que nenhum de seus colegas ainda zerou a vida, ganhe uma defesa passiva para todo dano equivalente à seu nível de Vida/2.` },
+        { nome: `GOLEM DE SEGURANÇA:`, descricao: `Ao estar em um combate que nenhum de seus colegas ainda zerou a vida, ganhe uma defesa passiva para todo dano equivalente à seu nível de Vida/2.` },
         { nome: `CHÁ DE ERVAS 2:`, descricao: `A cada 6h, tendo os ingredientes necessários, pode fazer um teste de Acampamento para fazer um chá de ervas curativas. Cada chaleira rende 2d6 porções, que curam 2d4 PV a cada 5 no resultado do teste.` },
         { nome: `MAGIA DE SANGUE:`, descricao: `Sempre que desejar, ao invocar uma magia (feitiço ou criatura), ao invés de gastar PM, pode receber a quantia equivalente de PV.` },
-        { nome: `PODER DA AMIZADE:`, descricao: `Caso um de seus colegas entre em morrendo, ganhe Muito Bom (Perito) em Resistir Magia, Resistir a Calor, Resistir a Frio até o final do poder.` },
+        { nome: `PODER DA AMIZADE:`, descricao: `Caso um de seus colegas entre em morrendo, ganhe Muito Bom (Perito) em Resistir Magia, Resistir a Calor, Resistir a Frio até o final do combate.` },
       ],
     },
     "Natural": {
@@ -1906,7 +1906,7 @@ Se a qualquer momento seu valor de Justiça for alterado, adquira mais ou menos 
         { nome: `COMIGO MORREU I:`, descricao: `Por uma quantidade de vezes igual o seu nível de Vida/3 por sessão, pode negar um efeito de habilidade usado contra você.` },
         { nome: `COMIGO MORREU II:`, descricao: `Por uma quantidade de vezes igual o seu nível de Vida/2 por sessão, pode negar um efeito de habilidade usado contra você.` },
         { nome: `HYPERFOCO:`, descricao: `Para cada 2 níveis de Justiça seus (arredondado para baixo), escolha uma Perícia na qual você seja Treinade ou Perite. O seu bônus nesta Perícia é dobrado (se for Treinade, receba +6 no dado ao invés de +3; se for Perite, receba +10 ao invés de +5).` },
-        { nome: `CONCENTRAR/MEDITAR:`, descricao: `Pode utilizar sua ação principal (ou 5 minutos, se não estiver em poder) para se fazer uma oração ou qualquer ritual religioso que desejar. Se o fizer, escolha um dos seguintes:
+        { nome: `CONCENTRAR/MEDITAR:`, descricao: `Pode utilizar sua ação principal (ou 5 minutos, se não estiver em combate) para se fazer uma oração ou qualquer ritual religioso que desejar. Se o fizer, escolha um dos seguintes:
 • Remova o efeito "Apavorado" ou "Aterrorizado" de si mesmo.
 • Pelas próximas 1d4/2 horas, substitua o efeito "Exaustão" por "Cansaço" ou "Cansaço" por "Fadiga".
 • Suspende o efeito de um Veneno por 1 hora (na hora seguinte, o veneno irá fazer o efeito que foi suspenso E o efeito que faria normalmente). Não pode ser usado novamente até seu Envenenado passar.
@@ -1914,7 +1914,7 @@ Se a qualquer momento seu valor de Justiça for alterado, adquira mais ou menos 
       ],
       "2": [
         { nome: `JÁ SOU A PIOR VERSÃO DE MIM:`, descricao: `Nenhum efeito de Habilidade ou Feitiço pode diminuir os valores de suas rolagens. Desvantagens ainda são aplicadas normalmente.` },
-        { nome: `REAÇÃO RETARDADA:`, descricao: `Antes de iniciar um poder, pode fazer uma oração ou qualquer ritual religioso que desejar. Se o fizer, a cada turno pode converter todas as reações que não utilizar num turno para ações extras no turno seguinte, segundo as seguintes restrições:
+        { nome: `REAÇÃO RETARDADA:`, descricao: `Antes de iniciar um combate, pode fazer uma oração ou qualquer ritual religioso que desejar. Se o fizer, a cada turno pode converter todas as reações que não utilizar num turno para ações extras no turno seguinte, segundo as seguintes restrições:
 • Pode transformar 3 reações não utilizadas em uma ação principal extra. Pode realizar esta conversão uma vez a cada 10 pontos de Justiça seus.
 • O número de ações principais extras que receber não pode ser maior do que a quantia de inimigos que você está enfrentando.
 • Pode transformar cada reação não utilizada ainda não convertida em uma ação de movimento extra.` },
@@ -1928,34 +1928,34 @@ Além disso, escolha dois Atributos, para cada 3 Pontos em cada um desses Atribu
     },
     "Justiceiro": {
       "0": [
-        { nome: `EQUILIBRAR:`, descricao: `Caso entre sozinho num poder contra mais de um adversário, e o nível somado dos adversários for maior que o seu, para cada nível de diferença escolha um:
+        { nome: `EQUILIBRAR:`, descricao: `Caso entre sozinho num combate contra mais de um adversário, e o nível somado dos adversários for maior que o seu, para cada nível de diferença escolha um:
 • Receba um dado de vantagem em todos os ataques que fizer.
 • Receba uma reação a mais por turno.` },
         { nome: `PROTETOR DOS OPRIMIDOS:`, descricao: `Se um indivíduo a até 10m de você atacar um alvo (que não seja você) e este alvo não realizar nenhum ataque ou invocar uma magia ofensiva em seu turno, pode fazer uma oração ou ritual religioso que desejar para receber +5 no ataque contra o indivíduo que fez o ataque e conferir 1d6 de dano de Justiça extra.` },
         { nome: `CHUMBO TROCADO NÃO DÓI:`, descricao: `Você pode usar essa habilidade por cena pelo valor de ⅔ de sua Justiça.
 Ao receber dano de uma pessoa, no seu próximo ataque contra ela, adicione metade do seu valor de Justiça no dano. Essa habilidade não pode ser usada 2x na mesma pessoa.` },
         { nome: `BRADO DOS DESAMPARADOS:`, descricao: `Se um indivíduo a até 10m de você, que não realizou ataques nem invocou magias ofensivas em seu turno, for alvo de um ataque ou magia ofensiva, você pode utilizar sua reação para lançar um brado desconfortante contra o atacante, em nome de alguma divindade da qual você seja devoto. O atacante recebe -1 no teste do ataque por cada nível de Justiça seu. Se o ataque for um feitiço que não necessite de uma rolagem do atacante, ao invés disso o alvo recebe +1 no teste de resistir por cada nível de Justiça seu.` },
-        { nome: `TUDO O QUE VAI, VOLTA:`, descricao: `Ao entrar em uma disputa contra qualquer outro ser (seja poder ou não), se este ser realizar uma rolagem contra você na qual ele tenha modificadores (bom, ruim etc), durante esta disputa você recebe o mesmo modificador (além dos seus já existentes) quando fizer essas ações contra este ser.` },
+        { nome: `TUDO O QUE VAI, VOLTA:`, descricao: `Ao entrar em uma disputa contra qualquer outro ser (seja combate ou não), se este ser realizar uma rolagem contra você na qual ele tenha modificadores (bom, ruim etc), durante esta disputa você recebe o mesmo modificador (além dos seus já existentes) quando fizer essas ações contra este ser.` },
         { nome: `DEFENSOR DOS FRACOS:`, descricao: `Obtém uma alternativa a mais de reação:
-• Escudo Humano: Pode tentar absorver um dano destinado a outro indivíduo, desde que este indivíduo ainda não tenha efetuado ataques nesse poder e você consiga interceptar o ataque com até 1 ação de movimento seu.
+• Escudo Humano: Pode tentar absorver um dano destinado a outro indivíduo, desde que este indivíduo ainda não tenha efetuado ataques nesse combate e você consiga interceptar o ataque com até 1 ação de movimento seu.
 Caso o faça, receba vantagem no teste de "Absorver".` },
       ],
       "1": [
-        { nome: `REERGUER:`, descricao: `Ao sofrer dano em poder, receba bônus em seu ataque equivalente ao dano lhe causado (apenas no próximo ataque que você proferir contra o atacante).` },
-        { nome: `O GOSTO DO PRÓPRIO REMÉDIO:`, descricao: `Ao utilizar uma reação para contra-atacar utilizando a mesma perícia de poder que o atacante, após rolar o seu dado mas antes de saber o resultado de seu oponente, pode optar por usar o resultado dele. Pode usar essa Habilidade uma vez por sessão para cada 2 níveis de Justiça seu.` },
-        { nome: `ESPADA JUSTICEIRA:`, descricao: `Só pode utilizar esta habilidade ao portar uma arma longa (de corte ou impacto). Recebe uma reação extra no seu turno, desde que use suas três ações para proteger seres que não estejam engajados em poder.
+        { nome: `REERGUER:`, descricao: `Ao sofrer dano em combate, receba bônus em seu ataque equivalente ao dano lhe causado (apenas no próximo ataque que você proferir contra o atacante).` },
+        { nome: `O GOSTO DO PRÓPRIO REMÉDIO:`, descricao: `Ao utilizar uma reação para contra-atacar utilizando a mesma perícia de Poder que o atacante, após rolar o seu dado mas antes de saber o resultado de seu oponente, pode optar por usar o resultado dele. Pode usar essa Habilidade uma vez por sessão para cada 2 níveis de Justiça seu.` },
+        { nome: `ESPADA JUSTICEIRA:`, descricao: `Só pode utilizar esta habilidade ao portar uma arma longa (de corte ou impacto). Recebe uma reação extra no seu turno, desde que use suas três ações para proteger seres que não estejam engajados em combate.
 Ao utilizar uma reação para proteger alguém,` },
         { nome: `REAÇÃO PREMATURA:`, descricao: `Por uma quantia de vezes ao dia equivalente ao seu nível de Justiça, pode usar sua ação principal para fazer uma oração ou qualquer ritual religioso que desejar, e se preparar para um contra-ataque. Se o fizer, sua primeira reação neste turno deve ser um contra-ataque, e se você obtiver sucesso no seu ataque, o ataque do oponente fracassará automaticamente.` },
         { nome: `REATRIBUIÇÃO:`, descricao: `Sempre que subir de nível pode reorganizar seus PA como desejar, de acordo com as seguintes restrições:
 • Nenhum Atributo pode ter valor menor que 1.
 • Os Atributos que correspondam aos Rudimentos que você não tenha afinidade não podem ultrapassar o valor de 5.` },
-        { nome: `LEVANTA-TE E ANDA:`, descricao: `Uma vez por poder, no turno em que um indivíduo receber dano (desde que este dano não zere seus PV), pode usar sua ação principal para fazer um teste de Medicina neste indivíduo enquanto faz uma oração ou qualquer ritual religioso que desejar. Em caso de sucesso (dificuldade 20), recupere todo o PV perdido por este último ataque, mais 1PV por cada 2 pontos de Medicina seus.` },
+        { nome: `LEVANTA-TE E ANDA:`, descricao: `Uma vez por combate, no turno em que um indivíduo receber dano (desde que este dano não zere seus PV), pode usar sua ação principal para fazer um teste de Medicina neste indivíduo enquanto faz uma oração ou qualquer ritual religioso que desejar. Em caso de sucesso (dificuldade 20), recupere todo o PV perdido por este último ataque, mais 1PV por cada 2 pontos de Medicina seus.` },
       ],
       "2": [
         { nome: `HYPERDETERMINAÇÃO:`, descricao: `Sempre que for receber dano psíquico, pode fazer uma oração ou qualquer ritual religioso que desejar para poder utilizar a ação "Absorver", como se fosse um ataque vida. Se o fizer, isso conta como uma das suas reações neste turno.` },
         { nome: `NÃO BRINCA COM QUEM TÁ QUIETO...:`, descricao: `Ao ser atacado com sucesso por um alvo contra o qual você ainda não estava hostil, receba apenas metade do dano (arredondado para cima). Além disso, receba um bônus em seu próximo dado de ataque equivalente ao dano recebido no ataque, e confira um bônus no dano equivalente ao seu valor de Justiça.` },
         { nome: `DUELO EQUIPARADO:`, descricao: `Quando entrar em um poder ou qualquer embate, escolha 1 Perícia para cada nível de Justiça seu. Ao enfrentar um oponente que é melhor que você em alguma das Perícias escolhidas, force-o a jogar em seu nível, somando os seus valores dessa Perícia e o do alvo, e dividindo igualmente entre os dois.` },
-        { nome: `TUDO O QUE VAI, VOLTA II:`, descricao: `Ao entrar em uma disputa contra qualquer outro ser (seja poder ou não), sempre que este ser realizar uma rolagem contra você, durante esta disputa você recebe os mesmos bônus na rolagem quando fizer ações contra este ser que sejam da mesma Perícia que ele utilizou (além dos bônus que você mesmo teria).
+        { nome: `TUDO O QUE VAI, VOLTA II:`, descricao: `Ao entrar em uma disputa contra qualquer outro ser (seja combate ou não), sempre que este ser realizar uma rolagem contra você, durante esta disputa você recebe os mesmos bônus na rolagem quando fizer ações contra este ser que sejam da mesma Perícia que ele utilizou (além dos bônus que você mesmo teria).
 Por exemplo: se sue adversárie fizer uma rolagem de Carregar/Levantar Peso em uma queda de braços contra você, a partir da sua próxima rolagem de Carregar/Levantar peso contra elu você faz sua rolagem normal e adiciona todos os bônus que elu utilizou (vindos dos valores de Vida, Força, Carregar/Levantar peso de delu, mais quaisquer Habilidades que elu tenha utilizado). O mesmo se aplica nesta queda de braços caso você faça um teste de Danificar ou Segurar (pois ambos também são testes de Força).` },
         { nome: `SACRAMENTAR INDIVÍDUO:`, descricao: `Pode gastar uma ação principal para sacramentar um indivíduo alvo, fazendo uma oração ou qualquer ritual religioso que desejar. Para cada indivíduo que sacramentar, escolha um:
 • O indivíduo sacramentado recebe 2d6 de bônus de Defesa em até 4 ataques a sofrer nas próximas 24h. Para cada 3 pontos de dano absorvidos devido a esta habilidade, você confere 2 de dano extra em seu próximo ataque (efeito cumulativo).
@@ -1990,7 +1990,7 @@ Tem 100% de acurácia na distinção entre tons de cores, desde que esteja as ve
       ],
       "2": [
         { nome: `INABALÁVEL:`, descricao: `Imune a Apavorado, Aterrorizado e jamais fracassa num teste de Resistir a Intimidação.` },
-        { nome: `AUXÍLIO CELESTE:`, descricao: `Sempre que auxiliar um indivíduo a fazer qualquer ação fora de um poder, não só some metade de seu bônus no teste dele, como também confira 1 vantagem no teste e diminua a margem de crítico em 1.` },
+        { nome: `AUXÍLIO CELESTE:`, descricao: `Sempre que auxiliar um indivíduo a fazer qualquer ação fora de um combate, não só some metade de seu bônus no teste dele, como também confira 1 vantagem no teste e diminua a margem de crítico em 1.` },
         { nome: `ABENÇOAR:`, descricao: `Pode gastar uma ação principal para abençoar um indivíduo alvo, fazendo uma oração ou qualquer ritual religioso que desejar. Para cada indivíduo que abençoar, escolha um:
 • Dentro das próximas 24h, o indivíduo ganha 1d6 de dano de Justiça para cada 3 pontos de Justiça seus, os quais pode usar no momento que desejar após realizar um contra-ataque bem sucedido. Não aplique a penalidade de redução de dano do contra-ataque para esses dados.
 • Dentro das próximas 24h, o alvo recebe 5 de resistência contra dano Rudimentar de qualquer Atributo a sua escolha no momento da bênção.
@@ -3889,7 +3889,7 @@ CATALOGO_HABILIDADES["Conhecimento"]["Elétrico"]["2"] = [
           { nome: `ELETRICISTA:`, descricao: `Imune a paralisia e danos elétricos.` },
           { nome: `DOWNLOAD EM TORRENT:`, descricao: `Pode criar um cavalo de tróia em qualquer formato de arquivo - faça um teste de Software para determinar apenas o tempo que leva para isso -. Se alguém baixar esse arquivo, escolha um dos seguintes:
 • Pode ativar remotamente uma opção para que o dispositivo infectado dê um choque ne usuárie;
-• Você tem acesso aos registros e arquivos do aparelho infectado. Durante uma interação ou poder com le usuárie do dispositivo, pode ameaçar divulgar um dos podres que conseguiu delu. Faça um teste de Intimidação contra o alvo, somando seu bônus de Software na rolagem. Em caso de sucesso, o alvo perde sua Ação de Movimento no próximo turno e fica suscetível a negociar contigo;
+• Você tem acesso aos registros e arquivos do aparelho infectado. Durante uma interação ou combate com le usuárie do dispositivo, pode ameaçar divulgar um dos podres que conseguiu delu. Faça um teste de Intimidação contra o alvo, somando seu bônus de Software na rolagem. Em caso de sucesso, o alvo perde sua Ação de Movimento no próximo turno e fica suscetível a negociar contigo;
 • Você rouba todo o dinheiro e criptomoedas dos aplicativos instalados no dispositivo;
 • Você sobrecarrega a bateria do dispositivo, fazendo-o explodir e soltar faíscas. Jogue qualquer dado. Um resultado par faz o dispositivo dar perda total, inclusive os arquivos na memória; um resultado ímpar só danifica a bateria. Independente do resultado, se tiver alguém utilizando ou portando o aparelho no momento da explosão, deve fazer um teste de esquiva, e em caso de fracasso, recebe 1d4+2 de dano - que só pode ser evitado se o alvo for imune a dano de fogo ou elétrico.` },
 ];
@@ -3941,7 +3941,7 @@ CATALOGO_HABILIDADES["Conhecimento"]["Sábio"]["2"] = [
   ◦ Descubra o valor de qualquer Perícia do alvo (à sua escolha);
   ◦ Descubra uma Habilidade do alvo, não referente ao seu Rudimento Primário;
   ◦ Descubra um feitiço que o alvo possa conjurar (desde que você possa ver seu símbolo). Se escolher esta opção, faça um teste de Feitiços para ver se sabe o que o feitiço faz.
-Pode reutilizar esta Habilidade com o mesmo alvo, desde que espere mais 3 turnos (se estiver em poder) ou mais 1h (se não estiver).` },
+Pode reutilizar esta Habilidade com o mesmo alvo, desde que espere mais 3 turnos (se estiver em combate) ou mais 1h (se não estiver).` },
           { nome: `DOUTOR SEM DOUTORADO:`, descricao: `Escolha uma Perícia de Conhecimento exceto Conhecimentos Gerais.
 Sua margem de crítico para esta Perícia diminui em 3 pontos. Sempre que fizer um teste dessa Perícia, se obtiver um resultado menor do que 20, ele se torna 20 (a não ser que tenha sido falha crítica).
 Sempre que uma situação fornecer sucesso automático para quem tiver "bom" ou "muito bom" em uma Especialização dessa Perícia, considere que você tem "muito bom" também na Perícia escolhida.` },
@@ -3980,7 +3980,7 @@ CATALOGO_HABILIDADES["Conhecimento"]["Guru"]["2"] = [
   ◦ Descubra os Rudimentos do alvo;
   ◦ Descubra uma Habilidade do alvo, não referente ao seu Rudimento Primário;
   ◦ Descubra um feitiço que o alvo possa conjurar (desde que você possa ver seu símbolo). Se escolher esta opção, faça um teste de Feitiços para ver se sabe o que o feitiço faz.
-Pode reutilizar esta Habilidade com o mesmo alvo, desde que espere mais 3 turnos (se estiver em poder) ou mais 1h (se não estiver).` },
+Pode reutilizar esta Habilidade com o mesmo alvo, desde que espere mais 3 turnos (se estiver em combate) ou mais 1h (se não estiver).` },
           { nome: `NOTÓRIO SABER:`, descricao: `Requisito: ter pelo menos Pedagogia nível 2.
 Pode fazer um teste de Pedagogia com dificuldade 25 para ensinar um ser uma Habilidade que você saiba (mesmo que o aprendiz não tenha afinidade com o Rudimento da Habilidade). Deve passar pelo menos 1 mês de aulas para que a Habilidade seja de fato aprendida. Em caso de sucesso, não poderá utilizar esta habilidade novamente por 3d6 dias.` },
           { nome: `MESTRE INVOCADOR:`, descricao: `Ao fazer um ritual de invocar criatura junto de qualquer grupo, todos os que participarem da invocação podem gastar PM ao invés de qualquer outro custo necessário, de acordo com a seguinte conversão:
@@ -4003,7 +4003,7 @@ CATALOGO_HABILIDADES["Poder"]["Combatente"]["0"] = [
           { nome: `TUDO OU NADA`, descricao: `A cada ataque que fizer, pode escolher receber -7 na rolagem de ataque. Se o fizer, diminua em 2 sua margem de crítico nesse ataque.` },
           { nome: `IMPROVISO:`, descricao: `Após quebrar uma arma, pode usar ela com estatísticas semelhantes a uma faca.
 Considere que qualquer arma branca que utilizar, exceto taser, possua a especificação "Girar".
-Receba vantagem na rolagem sempre que utilizar uma arma branca improvisada (cadeira, galho, garfo...) que pegar do cenário durante ou logo antes do poder.` },
+Receba vantagem na rolagem sempre que utilizar uma arma branca improvisada (cadeira, galho, garfo...) que pegar do cenário durante ou logo antes do combate.` },
           { nome: `SABER PONTOS VITAIS:`, descricao: `Sempre que obtiver um acerto crítico com uma arma branca, ao invés de rolar o dobro dos dados de dano, pode optar por todos os seguintes:
 • Conferir o dano máximo da arma sendo utilizada.
 • Conferir 50% de seus PDF como dano extra.` },
@@ -4036,13 +4036,13 @@ Ao fazer um ataque contra um indivíduo que utilizou um feitiço no último turn
 Ao atacar um ser que não seja um indivíduo, pode gastar 2 reações para que seu ataque tenha uma rolagem mínima de 20 (a não ser que seja falha crítica) e o adversário receba desvantagem na rolagem de sua reação. Deve escolher usar este parágrafo antes de fazer a rolagem do ataque.` },
           { nome: `HYPERCRÍTICO:`, descricao: `Ao obter sucesso crítico num ataque, role os dados de dano 2 vezes a mais.` },
           { nome: `GRITO DE GUERRA:`, descricao: `Pode usar sua ação de movimento para dar um grito de guerra para motivar seus aliados. Se o fizer e você estiver furtivo, você deixa de estar. Todos os seus aliados que puderem te ouvir e repetirem o grito recebem, apenas em seu próximo ataque, 2 dados de vantagem +2d4 de dano extra.` },
-          { nome: `ATAQUE DUPLO:`, descricao: `Por uma quantidade de vezes por poder equivalente a ½ do seu nível de Poder, caso use sua ação principal para atacar, pode utilizar a ação "Atacar" uma vez a mais.` },
+          { nome: `ATAQUE DUPLO:`, descricao: `Por uma quantidade de vezes por combate equivalente a ½ do seu nível de Poder, caso use sua ação principal para atacar, pode utilizar a ação "Atacar" uma vez a mais.` },
           { nome: `INFANTARIA ARCANA II:`, descricao: `Antes de atacar, pode escolher gastar 5PM para adicionar +1 dado de dano relacionado à seu dado extra recebido pela upagem. O alvo acertado, sangra por 2d4 turnos, recebendo 2 de dano extra por turno. O efeito é cumulativo.` },
 ];
 CATALOGO_HABILIDADES["Poder"]["Atirador"]["0"] = [
           { nome: `MÃOS FIRMES:`, descricao: `Sempre que atacar com uma arma exótica, recebe vantagem na rolagem de dano.
 Ou seja: sempre que tiver que rolar mais de um dado para conferir o dano de uma arma de fogo, receba vantagem na rolagem de UM dos dados de dano (se fosse rolar 2d6, role 3d6 e ignore o menor; se fosse rolar 1d4 e 1d10, escolha um desses dados e role com vantagem).` },
-          { nome: `GATILHO MAIS RÁPIDO DO OESTE:`, descricao: `Ao entrar em um poder, adicione o bônus de sua especialização (bom, muito bom, ruim, muito ruim) de arma de fogo na rolagem de iniciativa.` },
+          { nome: `GATILHO MAIS RÁPIDO DO OESTE:`, descricao: `Ao entrar em um combate, adicione o bônus de sua especialização (bom, muito bom, ruim, muito ruim) de arma de fogo na rolagem de iniciativa.` },
           { nome: `O BOM, O MAU E O FODINHA:`, descricao: `Ao matar um ser com um tiro só, role Intimidação somando a sua perícia de Armas de Fogo para afugentar inimigos que falharem no teste de Persistência` },
           { nome: `SNIPER DE INFANTARIA:`, descricao: `Ignora a penalidade de Rifles para tiros à curta distância.` },
           { nome: `SAQUE RÁPIDO:`, descricao: `Pode sacar sua arma como ação livre e trocar de arma como ação de movimento.` },
@@ -4069,7 +4069,7 @@ Ao realizar ataques com Arcos, pode utilizar 2 flechas por vez, conferindo 1d6 d
 ];
 CATALOGO_HABILIDADES["Poder"]["Atirador"]["2"] = [
           { nome: `DOSE DUPLA:`, descricao: `Por uma quantidade de vezes por poder equivalente a ½ do seu nível de Poder, caso use sua ação principal para Atirar, pode usar a ação Atirar mais uma vez.` },
-          { nome: `TIRO CERTEIRO IV:`, descricao: `Ao gastar uma reação, pode andar metade de seu movimento para se posicionar e achar o melhor ângulo de acerto, adicionando seu valor de poder como dano extra. (Deve ter comprado TIRO CERTEIRO III para adquirir essa habilidade)` },
+          { nome: `TIRO CERTEIRO IV:`, descricao: `Ao gastar uma reação, pode andar metade de seu movimento para se posicionar e achar o melhor ângulo de acerto, adicionando seu valor de Poder como dano extra. (Deve ter comprado TIRO CERTEIRO III para adquirir essa habilidade)` },
           { nome: `ARTILHARIA ARCANA II:`, descricao: `Antes de atacar, pode escolher gastar 5PM para adicionar +1 dado de dano relacionado à seu dado extra recebido pela upagem, e escolher um membro para debilitar do alvo. Dependendo do membro debilitado, o alvo terá uma desvantagem caso o use. A debilitação dura 2d4 turnos. O efeito é cumulativo` },
 ];
 CATALOGO_HABILIDADES["Poder"]["Incandescente"]["0"] = [
@@ -4083,13 +4083,13 @@ CATALOGO_HABILIDADES["Poder"]["Incandescente"]["0"] = [
 • Ao adquirir a condição "Queimado", pode apagar seu fogo como uma ação livre.
 • Ao receber dano de fogo, recebe apenas metade do dano.
 • Observar o fogo queimando em qualquer situação se torna uma ação de conforto sua (não principal), você adquire "Bom" nessa ação de conforto e pode utilizar essa ação como uma vez bônus por dia.` },
-          { nome: `CONSUMIDO PELO CALOR DA BATALHA:`, descricao: `A qualquer momento num poder, se fizer um ataque envolvendo chamas ou receber dano de fogo, escolha um:
+          { nome: `CONSUMIDO PELO CALOR DA BATALHA:`, descricao: `A qualquer momento num combate, se fizer um ataque envolvendo chamas ou receber dano de fogo, escolha um:
 • Recebe uma ação de movimento extra neste turno.
 • Tem direito a uma reação extra neste turno.` },
-          { nome: `CALOR DE MÃE:`, descricao: `Em um momento fora de poder, pode aliviar a dor de um aliado, envolva a pessoa em seus braços com um abraço caloroso e reduza 1d6 PE do alvo, e receba metade disso para você.` },
+          { nome: `CALOR DE MÃE:`, descricao: `Em um momento fora de combate, pode aliviar a dor de um aliado, envolva a pessoa em seus braços com um abraço caloroso e reduza 1d6 PE do alvo, e receba metade disso para você.` },
           { nome: `PIROMANÍACO:`, descricao: `Sempre tem um isqueiro, fósforo ou qualquer outra fonte de fogo (exceto em casos onde todo o seu inventário for saqueado).
 Se possuir alguma lata de aerossol, pode utilizá-la como lança-chamas por até 3 turnos, como se fosse "Bom" em "Lança-Chamas".
-Se possuir alguma lata ou garrafa de álcool, pode usar uma ação principal (ou 1 minuto, se estiver fora de poder) para fazer um Coquetel Molotov, sem ter que fazer nenhum teste.` },
+Se possuir alguma lata ou garrafa de álcool, pode usar uma ação principal (ou 1 minuto, se estiver fora de combate) para fazer um Coquetel Molotov, sem ter que fazer nenhum teste.` },
 ];
 CATALOGO_HABILIDADES["Poder"]["Incandescente"]["1"] = [
           { nome: `ESQUADRÃO ANTI-BOMBA:`, descricao: `Quando tiver que fazer um teste contra dano explosivo (granadas, bazocas, feitiços de bola de fogo ou similares...), receba vantagem no teste. Se o dano da explosão fizer você ficar com 0 ou menos PV, fique com 1 PV.` },
@@ -4119,9 +4119,9 @@ CATALOGO_HABILIDADES["Desespero"]["Caótico"]["0"] = [
 • 4 – O alvo rola 3d6 além do d20. Fique com o maior resultado;
 • 5 – O alvo rola 2d12 ao invés de 1d20
 • 6 – O alvo rola 1d10+10 além do d20. Fique com o maior resultado.` },
-          { nome: `DÁ QUE EU TE DOU OUTRA:`, descricao: `Ao acordar (ou no início de cada sessão), role 3d20. Ao iniciar um poder, pode escolher um ser hostil a você envolvido no poder para cada um dos dados que ainda não utilizou. Em sequência, role 2d4 para determinar o turno em que o dado será utilizado. No turno sorteado, o alvo E VOCÊ não rolarão um d20 (escolha, no início do poder, se o dado valerá para a ação principal ou para a primeira reação); ao invés disso, vocês considerarão o resultado que você atribuiu. Ambos ainda podem usar suas próprias habilidades, feitiços etc para modificar este resultado. Ao final do dia (ou da sessão), perde os dados não utilizados.` },
+          { nome: `DÁ QUE EU TE DOU OUTRA:`, descricao: `Ao acordar (ou no início de cada sessão), role 3d20. Ao iniciar um combate, pode escolher um ser hostil a você envolvido no combate para cada um dos dados que ainda não utilizou. Em sequência, role 2d4 para determinar o turno em que o dado será utilizado. No turno sorteado, o alvo E VOCÊ não rolarão um d20 (escolha, no início do combate, se o dado valerá para a ação principal ou para a primeira reação); ao invés disso, vocês considerarão o resultado que você atribuiu. Ambos ainda podem usar suas próprias habilidades, feitiços etc para modificar este resultado. Ao final do dia (ou da sessão), perde os dados não utilizados.` },
           { nome: `INSTABILIDADE DE HUMOR:`, descricao: `Adquirir esta habilidade custa 3PP.
-Sempre que você ou o Instruto desejarem, até um máximo de 3 vezes num poder, 5 numa cena ou 10 num dia (ou sessão), role 1d5 para definir o seu humor:
+Sempre que você ou o Instruto desejarem, até um máximo de 3 vezes num combate, 5 numa cena ou 10 num dia (ou sessão), role 1d5 para definir o seu humor:
 • 1 – Triste: Recebe uma vantagem em testes de Resistência e Determinação, e uma desvantagem em testes de Atletismo e Carisma;
 • 2 – Irritade: Recebe uma vantagem em testes de Poder, Intimidação, Força, Resistência e Atletismo (exceto Esquiva) e uma desvantagem em testes de Conhecimento, Justiça e Esquiva;
 • 3 – Alegre: Recebe uma vantagem em testes de Justiça e uma desvantagem em testes de Determinação e da sua maior Perícia de Poder e de Conhecimento;
@@ -4138,14 +4138,14 @@ CATALOGO_HABILIDADES["Desespero"]["Caótico"]["1"] = [
 • 5 – Brado Inspirador: Todos os seus aliados no mesmo cômodo que você (exceto você) recebe 1d6 para utilizar uma vez como bônus em algum teste que quiserem dentro da próxima hora. Porém, você perde sua próxima ação de movimento (se já tiver utilizado a deste turno, perde a do próximo).
 • 6 – Pulmões de Aço: Role o dado mais 2 vezes e execute todos os efeitos obtidos. Se obter resultado 6 por 3 vezes em um mesmo uso desta habilidade, você fica rouca. Nesse caso, nenhum dos efeitos se concretiza e você não pode utilizar esse efeito novamente nem falar qualquer coisa pelas próximas 3 cenas.` },
           { nome: `OLHAR ATENTO:`, descricao: `Até 1d3 vezes ao dia, você pode encarar fixamente um indivíduo alvo por 1 minuto (ou 3 turnos seguidos, como ação livre). Se o fizer, perca 1d4+1 PE e role um d5:
-• 1 – Desconfortar: O alvo fica desconfortável no mesmo ambiente que você, e muda de cômodo ou se afasta se não tiver nenhum motivo relevante para continuar onde está. Se o alvo estiver engajado num poder ou alguma atividade que julgue importante, ele deve fazer um teste de "Persistência" contra sua "Intimidação" ou "Sedução" (à sua escolha), e caso ele falhe, se afasta da mesma maneira.
+• 1 – Desconfortar: O alvo fica desconfortável no mesmo ambiente que você, e muda de cômodo ou se afasta se não tiver nenhum motivo relevante para continuar onde está. Se o alvo estiver engajado num combate ou alguma atividade que julgue importante, ele deve fazer um teste de "Persistência" contra sua "Intimidação" ou "Sedução" (à sua escolha), e caso ele falhe, se afasta da mesma maneira.
 • 2 – Seduzir: O alvo se sente estranhamente atraído por você, mesmo que perturbado; esse pode ser o início de uma relação bem desconfortante... Recebe +5 em testes de Sedução contra o alvo, qualquer que sejam suas sexualidades.
-• 3 – Analisar: Você descobre uma maneira mais eficaz de poderr ou persuadir o alvo. Escolha um dos seguintes:
+• 3 – Analisar: Você descobre uma maneira mais eficaz de combater ou persuadir o alvo. Escolha um dos seguintes:
   • Receba vantagem nos próximos 1d4 ataques ou testes de Carisma contra esse alvo (exceto Sedução ou Divertir).
   • Descubra quantos PV e TE o alvo possui.
   • Descubra sua motivação (Atributo Primário).
 • 4 – Aterrorizar: Recebe +10 em testes de Intimidação contra o alvo e ele sente medo de fazer qualquer ação contra você pelos próximos 1d6 * 10 minutos.
-• 5 – Desafiar: O alvo se sente compelido a ser melhor que você. Se for um aliado, ele inicia algum teste contra você (campeonato de "tempo sem piscar", jogo de encarar, queda de braço...); se não for um aliado, ele se torna hostil a você (se estiverem em poder, ele só pode atacar você; se estiverem numa situação social tem desvantagens em sedução ou persuasão, etc).` },
+• 5 – Desafiar: O alvo se sente compelido a ser melhor que você. Se for um aliado, ele inicia algum teste contra você (campeonato de "tempo sem piscar", jogo de encarar, queda de braço...); se não for um aliado, ele se torna hostil a você (se estiverem em combate, ele só pode atacar você; se estiverem numa situação social tem desvantagens em sedução ou persuasão, etc).` },
 ];
 CATALOGO_HABILIDADES["Desespero"]["Caótico"]["2"] = [
 
@@ -4196,7 +4196,7 @@ CATALOGO_HABILIDADES["Desespero"]["Aflito"]["1"] = [
           { nome: `MÁGICO DE RUA SALAFRÁRIO:`, descricao: `Ao fazer ou resistir a testes de "Roubo", pode perder 1d4+1 PE para obter vitória instantânea.` },
           { nome: `NECROFAGIA:`, descricao: `Pode se alimentar da carne de um cadáver recém abatido. Se o fizer, perca 1d6 PE e recupere 1d8 PV (podendo ultrapassar seu máximo de vida).
 Pode usar esta habilidade até 2 vezes por cadáver.` },
-          { nome: `FAZ DIREITO, CACETE!:`, descricao: `Caso um ser em seu campo de visão falhe em uma rolagem em poder (exceto ao invocar magias), pode gritar com o alvo e gastar 1 reação (sua) para que elu re-role o dado (deve ficar com o novo resultado). Caso a falha persista, ambos tomam 2d6 de Estresse. Caso seja sucesso, apenas o alvo recebe 1d6 de PE` },
+          { nome: `FAZ DIREITO, CACETE!:`, descricao: `Caso um ser em seu campo de visão falhe em uma rolagem em combate (exceto ao invocar magias), pode gritar com o alvo e gastar 1 reação (sua) para que elu re-role o dado (deve ficar com o novo resultado). Caso a falha persista, ambos tomam 2d6 de Estresse. Caso seja sucesso, apenas o alvo recebe 1d6 de PE` },
           { nome: `PASSADO TRAUMÁTICO:`, descricao: `Sempre obtém sucesso automático em testes de Ocultismo cuja dificuldade seja até difícil (20), quer você queira quer não. Se o teste em questão for um teste de "criatura" que você ainda não tiver encontrado durante a campanha, receba o estresse como se tivesse vendo a criatura pela primeira vez e fracassasse no teste de Coragem.` },
           { nome: `CURA PELO HORROR:`, descricao: `• Sugar Veneno: Até duas vezes ao dia, pode usar sua ação para gastar 1d4 PE e transferir 1d4 PV seu para outro alvo que você desejar.
 • Revitalização Pueril: Até duas vezes ao dia, pode envolver um ferimento seu ou de uma pessoa inseparável sua com cinzas de qualquer tipo. Se o fizer, gaste 2d3 TE para recuperar 1d6 PV do alvo.` },
@@ -4216,9 +4216,9 @@ Se conseguir atingir seu objetivo (matar o alvo, manipulá-lo com sucesso...), r
           { nome: `MAGIA É PARA OS LOUCOS:`, descricao: `Sempre que desejar, ao invocar uma magia (feitiço ou criatura), ao invés de gastar PM, pode receber a quantia equivalente de PE.` },
           { nome: `PSEUDO-VERSÁTIL:`, descricao: `A partir do momento em que comprar esta habilidade, uma vez sempre que subir de nível pode comprar uma habilidade de qualquer rudimento pagando seu custo de PP em TE.` },
           { nome: `LADRÃO POR FALTA DE OPÇÃO:`, descricao: `Assim que comprar esta habilidade, perca 3d4 TE. Receba vantagem e +5 em qualquer teste de "Manualidade" ou "Artimanha". Sempre adquira o dobro de bônus ao saquear qualquer ser.` },
-          { nome: `DE MÉDICO E LOUCO...:`, descricao: `Até 2 vezes por poder, pode acumular 1d6 PE para fazer um teste de medicina como ação de movimento, ou 2d6 PE para fazer como ação bônus.
+          { nome: `DE MÉDICO E LOUCO...:`, descricao: `Até 2 vezes por combate, pode acumular 1d6 PE para fazer um teste de medicina como ação de movimento, ou 2d6 PE para fazer como ação bônus.
 Quando estiver com 10 PE ou menos restantes, sempre cure 2d4 a mais quando fizer qualquer teste de Medicina.` },
-          { nome: `INTIMIDAR FAMILIAR:`, descricao: `Quando encontrar algum animal selvagem, pode fazer um teste de Intimidação (dificuldade dependente do animal) e perder 2d6 PE. Em caso de sucesso, este animal se torna seu animal de estimação e agora ele te teme você. Se já tiver outro animal de estimação, substitua-o por este. Seu animal de estimação obedece suas ordens em situações fora de poder, desde que não ameacem sua própria vida. Por ele teme-lo, interagir com ele não conta como uma ação de conforto sua. Durante um poder, pode ordena-lo qualquer um dos seguintes:
+          { nome: `INTIMIDAR FAMILIAR:`, descricao: `Quando encontrar algum animal selvagem, pode fazer um teste de Intimidação (dificuldade dependente do animal) e perder 2d6 PE. Em caso de sucesso, este animal se torna seu animal de estimação e agora ele te teme você. Se já tiver outro animal de estimação, substitua-o por este. Seu animal de estimação obedece suas ordens em situações fora de combate, desde que não ameacem sua própria vida. Por ele teme-lo, interagir com ele não conta como uma ação de conforto sua. Durante um combate, pode ordena-lo qualquer um dos seguintes:
 • Como uma ação principal, pode ordenar a ele que ataque qualquer que esteja ao alcance dele e visível para você.
 • Como uma ação de movimento, pode ordenar a ele que se movimente.
 • Como uma reação, pode ordenar que ele se jogue na frente de qualquer ataque. Ele faz um teste de Acrobacia contra o atacante como se fosse um teste de Esquiva e recebe o dano reduzido de sua própria defesa.
@@ -4262,15 +4262,15 @@ CATALOGO_HABILIDADES["Prazer"]["Romântico"]["0"] = [
           { nome: `REI DA FESTA:`, descricao: `Sempre que fizer um teste de Divertir, reduz 1d4 PE extra do alvo e 1d6 de si mesmo.` },
           { nome: `DESCONFIADO:`, descricao: `Recebe vantagem e +3 de bônus nos testes que envolverem perceber indivíduos hostis a você (seja Percepção, Investigação, Detectar Emoções ou qualquer outra Perícia que possa ser usada para tentar identificar qualquer indivíduo hostil).` },
           { nome: `CARNE E UNHA:`, descricao: `Sempre que obter sucesso em dois testes consecutivos de Sedução contra um mesmo alvo, pode tornar esse alvo sua nova Alma Gêmea. Para você e sua(s) Alma(s) Gêmea(s) sempre vale que:
-• Se ambos fizerem a mesma ação num turno durante um poder (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), ambos recebem 1d4 PE.
+• Se ambos fizerem a mesma ação num turno durante um combate (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), ambos recebem 1d4 PE.
 • Se um atacar o outro (sem consentimento), o atacante perde 1d6 PE.
 • Duas vezes ao dia, se ambos estiverem sozinhos num cômodo, eles podem ficar 10 minutos neste cômodo a fim de ambos reduzirem 2d4 PE. Se alguém entrar no cômodo antes dos 10 minutos acabarem, ou se qualquer um dos 2 saírem do cômodo, a ação é cancelada.` },
           { nome: `BFF:`, descricao: `Sempre que obter sucesso num teste de Divertir, pode tornar o alvo do seu teste seu novo Melhor Amigo (o alvo deve concordar com isso). Para você e seu Melhor Amigo sempre vale que:
-• Se ambos fizerem a mesma ação num turno durante um poder (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), ambos reduzem 1d4 PE.
+• Se ambos fizerem a mesma ação num turno durante um combate (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), ambos reduzem 1d4 PE.
 • Se um atacar o outro, o atacante recebe 1d6 PE e o alvo recebe 1d4 PE.
 • Definam a "Atividade Preferida" dessa dupla de amigos (similar a uma ação de conforto, mas que vale apenas para a dupla e não para os indivíduos). Duas vezes ao dia, quando os Melhores Amigos fizerem sua Atividade Preferida juntos, ambos reduzem 2d4 PE.` },
           { nome: `NÓS TRÊS PARA SEMPRE:`, descricao: `Sempre que obter sucesso num teste de Divertir, pode tornar o alvo do seu teste seu novo Grupo de Melhores Amigos, podendo ser no máximo em até 3 indivíduos. Para você e seu Grupo sempre vale que:
-• Se os três fizerem a mesma ação num turno durante um poder (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), todos recebem 1d4 PE.
+• Se os três fizerem a mesma ação num turno durante um combate (ambos atacarem, invocarem um feitiço, tratarem de um aliado...), todos recebem 1d4 PE.
 • Se um atacar o outro, o atacante recebe 1d12 PE, o alvo perde 1d8 PE e o terceiro indivíduo perde 1d6 PE.
 • Definam a "Atividade Preferida" desse grupo de amigos (similar a uma ação de conforto, mas que vale apenas para o grupo e não para os indivíduos). Duas vezes ao dia, quando todos do Grupo de Melhores Amigos fizerem sua Atividade Preferida juntos, todos recuperam 2d4 PE.` },
           { nome: `DELEITADOR:`, descricao: `Pode realizar 4 ações de auto-conforto por dia (ao invés de 2).` },
@@ -4288,7 +4288,7 @@ Se qualquer ser descobrir sua Ação de Conforto principal e tentar utilizá-la 
           { nome: `AMIGO... AMIGO...`, descricao: `Quando encontrar um ser hostil a você que não esteja protegendo um Inseparável dela (território, família, tesouro...) ou sendo coagida a se contrapor a você (ameaçada, contratado...), pode fazer um teste Carisma (escolha a perícia que mais julgar adequado) com dificuldade 25. Em caso de sucesso, ela deixa de ser hostil a você. Se seu resultado for 30, o alvo se torna amigável a você; se for 35 ou mais, o alvo se torna seu aliado.` },
           { nome: `CANALHA DE CARTEIRA ASSINADA:`, descricao: `Pode ser usado uma vez ao dia (ou sessão) para cada 3 níveis de Prazer seu. Quando fizer um teste de Mentir, caso sua mentira envolva diretamente uma Especialização em que você é Treinade, receba sucesso automático se a dificuldade for até 20; se você for Perite, receba sucesso automático se a dificuldade for até 25.` },
           { nome: `SÁDICO:`, descricao: `Sempre que presenciar um ser receber pontos de estresse ao seu redor, recupere metade dos pontos perdidos por esse ser (exceto se essa mesma fonte de estresse te afetar também).` },
-          { nome: `AUTOPRESERVAÇÃO:`, descricao: `Caso não receba dano algum durante um poder, reduza 2d4 PE.` },
+          { nome: `AUTOPRESERVAÇÃO:`, descricao: `Caso não receba dano algum durante um combate, reduza 2d4 PE.` },
           { nome: `OURO DE TOLO:`, descricao: `Sempre que for contratado para fazer um serviço em troca de dinheiro (exceto serviços com contrato prévio, como carteira de trabalho), pode fazer um teste de Persuadir (com a dificuldade sendo o valor de Determinação do contratante) para receber 50% a mais do valor ao fim do serviço.
 Ao finalizar um serviço remunerado, você e seu grupo reduzem também 2d6 PE cada.` },
 ];
@@ -4297,9 +4297,9 @@ CATALOGO_HABILIDADES["Prazer"]["Romântico"]["2"] = [
 • Para cada Alma Gêmea que você tiver, reduza 1d4 extra de PE, quando usar Auto-Conforto;
 • Para cada Alma Gêmea que esteja com você (fisicamente próximo a você), receba um dado de vantagem em rolagens de Coragem e Persistência;
 • Para cada Alma Gêmea que esteja com você, receba um bônus de +3 nas rolagens de Atuação;
-• Para cada Alma Gêmea que esteja com você, receba um dado de vantagem em testes que envolvam evitar um poder.` },
+• Para cada Alma Gêmea que esteja com você, receba um dado de vantagem em testes que envolvam evitar um combate.` },
           { nome: `NUNCA FOI SORTE, SEMPRE FOI TREINO:`, descricao: `Ao fazer um teste que envolva Performance, pode escolher não rolar dados. Se o fizer, o seu valor em Performance se torna seu resultado na rolagem.
-Se utilizar isso em um poder por 2 turnos seguidos (seja como ação, reação ou ambos), sofra Exaustão no turno seguinte.` },
+Se utilizar isso em um combate por 2 turnos seguidos (seja como ação, reação ou ambos), sofra Exaustão no turno seguinte.` },
           { nome: `CHORAMINGAR PRA INSTRUTA:`, descricao: `Quando pedir à Instruta para fazer um teste utilizando outra perícia que não a solicitada por ela, se ela recusar o pedido, pode gastar um uso desta Habilidade para fazer a rolagem solicitada mesmo assim.
 Pode usar esta Habilidade uma vez por sessão para cada 6 pontos que tiver em seu bônus de Malandragem (Malandragem + Artimanha + Prazer).` },
           { nome: `SEDUÇÃO EXTRAPLANAR:`, descricao: `Quando fizer um teste de Sedução, antes de rolar os dados, se o seu RP (sua interpretação) for efetiva a algum dos jogadores na mesa, a personagem delu será automaticamente seduzida, mesmo que não seja o alvo da ação, ou sequer esteja no mesmo ambiente.
@@ -4317,11 +4317,11 @@ Como uma ação principal num turno, pode gastar 2 PC para um dos seguintes:
           { nome: `FALSÁRIO:`, descricao: `Quando fizer algum teste de Falsificação, some ao teste metade de seu bônus de Trabalhos Manuais.` },
           { nome: `SEDUTOR:`, descricao: `Recebe vantagem em todos os testes de Sedução.
 Pode somar seu bônus de Sedução (Treinado, Perito, etc) ao fazer qualquer teste de Carisma (exceto Contatos). Se o fizer, o alvo fica encantado com você e deve fazer um teste de "Persistência" (dificuldade = 5 + seu valor de Sedução) caso queira fazer alguma ação contra você.` },
-          { nome: `INSUPORTÁVEL:`, descricao: `Como ação principal, ou fora de poder, pode fazer um teste de Intimidar ou Persuadir para zombar de um indivíduo alvo com o qual possa se comunicar. O indivíduo tenta resistir com um teste de Persistência.
+          { nome: `INSUPORTÁVEL:`, descricao: `Como ação principal, ou fora de combate, pode fazer um teste de Intimidar ou Persuadir para zombar de um indivíduo alvo com o qual possa se comunicar. O indivíduo tenta resistir com um teste de Persistência.
 Caso você falhe, o alvo tem vantagem em sua próxima ação contra você.
 Em caso de empate, ou de vitória sua, o alvo recebe desvantagem em todos os testes que fizer até seu próximo turno.
 Em caso de sucesso crítico, ou por 2 ou mais classes de dificuldade, o alvo fica Atordoado.` },
-          { nome: `LÍDER RESPEITADO:`, descricao: `Pode motivar uma pessoa a realizar sua tarefa. Essa pessoa recebe 1d6 bônus em sua rolagem para esta tarefa (além disso, ainda pode auxiliar essa pessoa em sua tarefa normalmente). Se estiver em poder, gaste sua ação de movimento para utilizar esta habilidade. A cada dia, pode utilizar esta habilidade uma quantia de vezes equivalente ao seu nível de Prazer.` },
+          { nome: `LÍDER RESPEITADO:`, descricao: `Pode motivar uma pessoa a realizar sua tarefa. Essa pessoa recebe 1d6 bônus em sua rolagem para esta tarefa (além disso, ainda pode auxiliar essa pessoa em sua tarefa normalmente). Se estiver em combate, gaste sua ação de movimento para utilizar esta habilidade. A cada dia, pode utilizar esta habilidade uma quantia de vezes equivalente ao seu nível de Prazer.` },
           { nome: `FALA MANSA:`, descricao: `Sempre que disser a verdade, não precisa realizar testes para convencer outro ser do que está sendo sincero.
 Se engajar uma conversa com algum outro ser por mais de 15 minutos, pode fazer um teste de Persuasão com um bônus de +3 contra a Persistência do alvo. Em caso de sucesso, o alvo solta casualmente na conversa uma informação que ele considerava secreta e que se relacione com o assunto. Após lhe dar a informação, o alvo faz um teste de Percepção (dificuldade 20) para perceber que disse o que não queria. Ele não passa imediatamente a pensar que você o manipulou, mas não poderá ser alvo desta habilidade novamente nesta conversa.
 Alternativamente, se ao invés de estar atrás de informação você estiver tentando guardar um segredo (ou mentir), após 5 minutos de conversa pode fazer o mesmo teste para induzir o alvo a trocar de assunto e desistir (ou esquecer) de tirar de você esta verdade que você quer guardar.` },
@@ -4351,12 +4351,12 @@ CATALOGO_HABILIDADES["Prazer"]["Manipulador"]["2"] = [
           { nome: `GAY PANIC:`, descricao: `Você é linde, gostose, charmose ou qualquer outra coisa que possa te deixar atraente. Pode usar esta Habilidade uma vez por sessão a cada 5 pontos de Prazer (arredondado para cima), quando for fazer um teste de Carisma. Quando o fizer, valem todos:
 • Receba um sucesso automático se o alvo do teste for um ser que tenha 15 ou menos pontos em Determinação;
 • Receba +7 em suas rolagens de Seduzir, Persuadir, Intimidar e Lidar com Estranhos;
-• Se for bem sucedido em um teste de Seduzir durante um poder, contra um adversário, o alvo fica Paralisado por um turno, mais um para cada classe de sucesso acima do teste de resistência do alvo.` },
+• Se for bem sucedido em um teste de Seduzir durante um combate, contra um adversário, o alvo fica Paralisado por um turno, mais um para cada classe de sucesso acima do teste de resistência do alvo.` },
           { nome: `FILHO DO DONO:`, descricao: `Você é filhe de um poderoso magnata, empresário, ou qualquer outro capitalistinha de merda.
 Adicione o seu bônus de Financeiro em rolagens de Intimidação, Contatos e Persuadir.` },
 ];
 CATALOGO_HABILIDADES["Prazer"]["Náutico"]["0"] = [
-          { nome: `NÓ DE MARINHEIRO:`, descricao: `Recebe vantagem em testes de Trabalhos Manuais que envolvam amarrar ou prender coisas utilizando laços, cordas, barbantes ou similares. Durante o poder, se tiver segurando uma corda, barbante etc, pode usar sua Ação de Movimento & sua Ação Principal para amarrar os membros de um ser; em caso de sucesso ele não pode mover aquele membro, perde uma reação e pode fazer um teste de Malandragem, Trabalhos Manuais ou Danificar para se soltar (gastando uma ação principal para isso). Em caso de falha, sua corda arrebenta, mas você ainda pode usá-la em suas reações para Desviar os ataques que receber - receba +2 nesses testes.` },
+          { nome: `NÓ DE MARINHEIRO:`, descricao: `Recebe vantagem em testes de Trabalhos Manuais que envolvam amarrar ou prender coisas utilizando laços, cordas, barbantes ou similares. Durante o combate, se tiver segurando uma corda, barbante etc, pode usar sua Ação de Movimento & sua Ação Principal para amarrar os membros de um ser; em caso de sucesso ele não pode mover aquele membro, perde uma reação e pode fazer um teste de Malandragem, Trabalhos Manuais ou Danificar para se soltar (gastando uma ação principal para isso). Em caso de falha, sua corda arrebenta, mas você ainda pode usá-la em suas reações para Desviar os ataques que receber - receba +2 nesses testes.` },
           { nome: `CAMUFLAGEM AQUÁTICA:`, descricao: `Receba +5 em testes de Furtividade quando embaixo d'água e em Adestrar Animais para animais aquáticos.` },
           { nome: `PULMÃO DE NÃO FUMANTE:`, descricao: `Quando debaixo d'água demora o dobro do tempo para perder o fôlego e precisar respirar novamente.
 Sua velocidade de nado é dobrada.
@@ -4389,7 +4389,7 @@ A partir do momento em que adquirir esta Habilidade, comece a contar os copos de
 • 3 copos d'água por 1 vantagem ou desvantagem em qualquer rolagem (sua, de ume aliade ou inimigue);
 • 1 copo d'água por +3 em qualquer rolagem sua;
 • 2 copos d'água para recuperar 5 PV ou 5 PM ou para reduzir 5 PE seus;
-• 8 copos d'água para interferir em uma cena, de modo não extremo (pode fazer uma personagem, NPC ou de jogador, trocar o alvo de um ataque, tropeçar ou ficar sem voz, mas não desistir de um poder ou comer algo que achou jogado no chão).` },
+• 8 copos d'água para interferir em uma cena, de modo não extremo (pode fazer uma personagem, NPC ou de jogador, trocar o alvo de um ataque, tropeçar ou ficar sem voz, mas não desistir de um combate ou comer algo que achou jogado no chão).` },
           { nome: `HOMEM AO MAR:`, descricao: `Escolha 2:
 • Consegue prender a respiração por 15 minutos e recebe Treinado em Natação (se já for Treinado, se torna Perito; se já for Perito, receba vantagem nos testes desta Especialização);
 • Consegue nadar independente das condições do local onde está nadando (durante uma tempestade ou em uma piscina de sangue, por exemplo). Tem vantagem em todos os testes de Natação que fizer;
@@ -7660,6 +7660,7 @@ function anotRender() {
 function anotNovaSecao() {
   anotacoes.push({ id: anotNextId++, titulo: "Título", texto: "", collapsed: false });
   anotRender();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
   // Focus on new section title
   const inputs = document.querySelectorAll(".anot-secao-titulo");
   if (inputs.length) inputs[inputs.length - 1].focus();
@@ -7674,17 +7675,25 @@ function anotUpdate(id, campo, val) {
       const div = document.querySelector(`.anot-secao[data-id="${id}"] .anot-char-count`);
       if (div) div.textContent = val.length + " caracteres";
     }
-    // Auto-save to localStorage
+    // Auto-save local (status próprio da aba)
     clearTimeout(anotacoes._saveTimer);
     anotacoes._saveTimer = setTimeout(anotAutoSave, 1500);
     const status = document.getElementById("anot-status");
     if (status) { status.textContent = "não salvo"; status.style.color = "var(--yellow, #f1c040)"; }
+    // Marca a ficha principal como alterada — sem isso, as anotações nunca
+    // entravam no autosave real (fichaAutoSave), pois esse era o único hook
+    // que persistia o estado completo (anotacoes incluso) no localStorage.
+    if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
   }
 }
 
 function anotToggle(id) {
   const sec = anotacoes.find(s => s.id === id);
-  if (sec) { sec.collapsed = !sec.collapsed; anotRender(); }
+  if (sec) {
+    sec.collapsed = !sec.collapsed;
+    anotRender();
+    if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
+  }
 }
 
 function anotDel(id) {
@@ -7692,10 +7701,15 @@ function anotDel(id) {
   if (!confirm("Remover esta seção?")) return;
   anotacoes = anotacoes.filter(s => s.id !== id);
   anotRender();
+  anotAutoSave();
+  if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
 }
 
 function anotSalvar() {
   anotAutoSave();
+  // Força o salvamento imediato da ficha principal (sem esperar o debounce de
+  // 2s) — é isso que de fato persiste as anotações junto do resto da ficha.
+  if (typeof fichaAutoSave === "function") fichaAutoSave();
 }
 
 function anotAutoSave() {
