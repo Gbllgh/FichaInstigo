@@ -1759,7 +1759,37 @@ h1 {
 }
 .hab-item-remove:hover { color: var(--red); }
 
-/* Catálogo — tabs com cor por atributo */
+.hab-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0 6px 0 0;
+}
+.hab-item-edit {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: .68em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: 4px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .12s;
+}
+.hab-item-edit:hover { color: var(--accent); }
+.hab-item-actions .hab-item-remove { padding: 4px 6px; margin-top: 0; }
+
+.hab-item-editando {
+  outline: 1px dashed var(--accent2);
+  outline-offset: 2px;
+}
+
+
 .cat-tab-atrib[data-atrib="Poder"].active     { background: #2a0000; border-color: var(--c-poder); color: var(--c-poder); }
 .cat-tab-atrib[data-atrib="Conhecimento"].active      { background: #2e2400; border-color: var(--c-conhecimento); color: var(--c-conhecimento); }
 .cat-tab-atrib[data-atrib="Vida"].active      { background: #0a2010; border-color: var(--c-vida); color: var(--c-vida); }

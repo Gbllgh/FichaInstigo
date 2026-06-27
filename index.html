@@ -492,7 +492,7 @@
   <h2>Perícias &amp; Subperícas</h2>
   <div class="espec-resumo">
     <div class="espec-resumo-item">
-      <span class="espec-badge badge-mb">Muito Bom (+5)</span>
+      <span class="espec-badge badge-mb">Muito Bom (+3, Vantagem)</span>
       <span class="espec-count" id="cnt-mb">0 / 3</span>
     </div>
     <div class="espec-resumo-item">
@@ -504,7 +504,7 @@
       <span class="espec-count" id="cnt-r">0 / 4</span>
     </div>
     <div class="espec-resumo-item">
-      <span class="espec-badge badge-mr">Muito Ruim (−5)</span>
+      <span class="espec-badge badge-mr">Muito Ruim (−3, Desvantagem)</span>
       <span class="espec-count" id="cnt-mr">0 / 2</span>
     </div>
   </div>
@@ -550,7 +550,7 @@
 
   <!-- Formulário para adicionar -->
   <div class="hab-bloco">
-    <h3>Adquirir Habilidade</h3>
+    <h3 id="hab-form-titulo">Adquirir Habilidade</h3>
     <div class="hab-form">
       <div class="hab-form-group" style="flex:1;min-width:300px;">
         <label>Nome da Habilidade</label>
@@ -576,7 +576,7 @@
     </div>
 
     <!-- Fontes de PP -->
-    <div class="hab-pp-fonte">
+    <div class="hab-pp-fonte" id="hab-pp-fonte-box">
       <div class="hab-pp-fonte-titulo">De onde tirar os PP</div>
       <div id="hab-fontes-cont">
         <div style="font-size:0.83em;color:#aaa;">Clique em "+ Adicionar perícia fonte" para alocar PP.</div>
@@ -587,9 +587,12 @@
       </div>
     </div>
 
-    <div style="margin-top:10px;">
+    <div style="margin-top:10px;display:flex;gap:8px;">
       <button type="button" class="hab-btn-add" id="hab-btn-confirmar" onclick="confirmarHabilidade()" disabled>
         Confirmar Habilidade
+      </button>
+      <button type="button" class="btn-cancelar-feitico" id="hab-btn-cancelar-edicao" onclick="habCancelarEdicao()" style="display:none;">
+        Cancelar Edição
       </button>
     </div>
   </div>

@@ -145,7 +145,7 @@ const SUBPERICIAS_FIXAS = {
   "Ocultismo":   ["Mitologia","Feitiços/Rituais","Criaturas"],
   // Desespero
   "Psicologia":    ["Detectar Emoções","Acalmar","Liderança","Diagnose"],
-  "Determinação":  ["Persistência","Evitar Magias"],
+  "Determinação":  ["Persistência","Evitar Magias","Intimidação"],
   "Atenção":       ["Percepção","Procura","Prontidão"],
   "Magia":         ["Invocar Magia","Detectar Magia"],
   "Auto-Conforto": ["AUTO_CONFORTO"],
@@ -155,7 +155,7 @@ const SUBPERICIAS_FIXAS = {
   "Resistência":  ["Resistência a pancada","Resistência a tortura","Resistência a esforço prolongado","Resistência ao frio","Resistência ao calor","Sistema imunológico"],
   "Sobrevivência":["Rastrear","Acampamento","Navegação"],
   // Prazer
-  "Carisma":     ["Lidar com Estranho","Persuadir","Sedução","Divertir","Contatos","Intimidação"],
+  "Carisma":     ["Lidar com Estranho","Persuadir","Sedução","Divertir","Contatos"],
   "Atuação":     ["Mentir","Se Passar por Outra Pessoa"],
   "Manualidade": ["Roubo","Trabalhos Manuais","Digitar"],
   "Artimanha":   ["Furtividade","Lock Pick","Malandragem"],
@@ -282,11 +282,11 @@ const LISTA_PERFORMANCES = [
 ];
 
 const ESPEC_CONFIG = {
-  "mb": { label:"Muito Bom", mod:+5, limite:3, classe:"val-mb" },
+  "mb": { label:"Muito Bom", mod:+3, limite:3, classe:"val-mb", vantagem: true },
   "b":  { label:"Bom",       mod:+3, limite:7, classe:"val-b"  },
   "":   { label:"—",         mod: 0, limite:Infinity, classe:"" },
   "r":  { label:"Ruim",      mod:-3, limite:4, classe:"val-r"  },
-  "mr": { label:"Muito Ruim",mod:-5, limite:2, classe:"val-mr" }
+  "mr": { label:"Muito Ruim",mod:-3, limite:2, classe:"val-mr", desvantagem: true }
 };
 
 function tabelaPD(soma) {
@@ -332,9 +332,11 @@ const statsAtuais = { pv: 0, pm: 0, te: 0 };
 const ppProgressao = {}; // PP distributed TO pericias from upagem
 let ppUpagemPool = 0;   // PP received from leveling, not yet distributed to pericias
 
-// PP gastos permanentemente em habilidades por perícia (nunca voltam)
-const ppGastoHabilidades = {}; // { pericia: total_gasto_base } // PP granted by habilidade effects (separate pool, not spendable)
+// PP gastos em habilidades por perícia (deduzidos de pericias[]/ppProgressao[]/ppDedPool;
+// devolvidos com precisão ao remover/editar a habilidade — ver habAplicarFontesPericia)
+const ppGastoHabilidades = {}; // { pericia: total_gasto_base }
 const ppGastoHabilidadesProg = {}; // { pericia: total_gasto_progressao }
+const ppGastoHabilidadesDed = {}; // { pericia: total_gasto_via_ppDedPool }
 
 // PA aplicados por atributo (não conectados): { nomeAtrib: pontosAplicados }
 const paAtributos = {};
@@ -380,8 +382,7 @@ function contarEspecTotal(tipo) {
   for (const p in subLivres) {
     c += subLivres[p].filter(it=>it.espec===tipo).length;
   }
-  // justiça
-  c += Object.values(especJustiça).filter(v=>v===tipo).length;
+  // Perícias de Dedicação (Justiça) não possuem especialização — não contam aqui.
   // perícias diretas (Poder)
   c += Object.values(especPericias).filter(v=>v===tipo).length;
   return c;
@@ -404,15 +405,26 @@ function modEspecPorNome(nome) {
     const it = subLivres[p].find(x => x.nome === nome);
     if (it) return it.espec ? ESPEC_CONFIG[it.espec].mod : 0;
   }
-  // verifica justiça
-  if (especJustiça[nome] !== undefined) {
-    return especJustiça[nome] ? ESPEC_CONFIG[especJustiça[nome]].mod : 0;
-  }
+  // Perícias de Dedicação (Justiça) não possuem especialização — sempre 0, não verifica especJustiça.
   // verifica perícias diretas (Poder)
   if (especPericias[nome] !== undefined) {
     return especPericias[nome] ? ESPEC_CONFIG[especPericias[nome]].mod : 0;
   }
   return 0;
+}
+
+// Mesma busca de modEspecPorNome, mas retorna a chave ("mb"|"b"|"r"|"mr"|"") em vez
+// do mod — necessário porque mb/b (e r/mr) agora compartilham o mesmo mod, então o
+// mod por si só não basta para saber se deve aplicar vantagem/desvantagem na rolagem.
+function tipoEspecPorNome(nome) {
+  if (especFixas[nome] !== undefined) return especFixas[nome] || "";
+  for (const p in subLivres) {
+    const it = subLivres[p].find(x => x.nome === nome);
+    if (it) return it.espec || "";
+  }
+  // Perícias de Dedicação (Justiça) não possuem especialização.
+  if (especPericias[nome] !== undefined) return especPericias[nome] || "";
+  return "";
 }
 
 function setEspecFixa(sub, tipo) {
@@ -441,12 +453,6 @@ function setEspecPericia(nome, tipo) {
 
 function setDesarmadoTexto(val) {
   desarmadoTexto = val;
-}
-
-function setEspecJustiça(nome, tipo) {
-  if (!podeEscolherEspec(tipo, especJustiça[nome]||"")) return;
-  especJustiça[nome] = tipo;
-  atualizarUI();
 }
 
 // ════════════════════════════════════════════════════════
@@ -494,10 +500,10 @@ function renderSubLivres(pericia) {
       <input type="text" value="${escHTML(item.nome)}" placeholder="Nome..." oninput="renomearSubLivre('${pericia}',${item.id},this.value)">
       <select class="espec-select" id="espec-livre-${item.id}" onchange="setEspecLivre(${item.id},this.value)">
         <option value="">— Especialização —</option>
-        <option value="mb">Muito Bom (+5)</option>
+        <option value="mb">Muito Bom (+3, Vantagem)</option>
         <option value="b">Bom (+3)</option>
         <option value="r">Ruim (−3)</option>
-        <option value="mr">Muito Ruim (−5)</option>
+        <option value="mr">Muito Ruim (−3, Desvantagem)</option>
       </select>
       <span class="espec-modificador" id="mod-livre-${item.id}"></span>
       <span class="pericia-total" id="tot-livre-${item.id}"></span>
@@ -551,11 +557,11 @@ function todasSubpericiasComEspec() {
       }
     });
   }
-  // Justiça (ativas e com nome)
+  // Justiça/Dedicação (ativas e com nome) — sem especialização, mod sempre 0
   const dedicPericias = [...Object.keys(SUBPERICIAS_DEDICACAO), "Performance"];
   dedicPericias.forEach(p => {
     subsJustiçaAtivas(p).forEach(s => {
-      lista.push({ nome: s.nome, mod: especJustiça[s.nome] ? ESPEC_CONFIG[especJustiça[s.nome]].mod : 0 });
+      lista.push({ nome: s.nome, mod: 0 });
     });
   });
   return lista;
@@ -933,31 +939,17 @@ function togglePerformance(perf) {
 }
 
 
+// Perícias de Dedicação (Justiça) não possuem especialização — esta função apenas
+// lista os desbloqueios ativos (por PP mínimo), sem seletor de MB/B/R/MR.
 function renderSubsJustiçaEspec(pericia, containerEl) {
   const ativas = subsJustiçaAtivas(pericia);
   if (!ativas.length) return;
 
   let html = `<div class="ded-subs-espec">`;
   ativas.forEach(s => {
-    const eId  = `espec-ded-${cssId(s.nome)}`;
-    const mId  = `mod-ded-${cssId(s.nome)}`;
-    const tId  = `tot-ded-${cssId(s.nome)}`;
-    const atual = especJustiça[s.nome] || "";
-    // Ensure registered
-    if (especJustiça[s.nome] === undefined) especJustiça[s.nome] = "";
-
     html += `<div class="subpericia-linha">
       <span class="subpericia-tag">↳</span>
       <div class="subpericia-nome">${s.nome}</div>
-      <select class="espec-select" id="${eId}" onchange="setEspecJustiça('${s.nome.replace(/'/g,"\'")}', this.value)">
-        <option value="">— Especialização —</option>
-        <option value="mb">Muito Bom (+5)</option>
-        <option value="b">Bom (+3)</option>
-        <option value="r">Ruim (−3)</option>
-        <option value="mr">Muito Ruim (−5)</option>
-      </select>
-      <span class="espec-modificador" id="${mId}"></span>
-      <span class="pericia-total" id="${tId}"></span>
     </div>`;
   });
   html += `</div>`;
@@ -966,41 +958,6 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
   const existing = containerEl.querySelector(".ded-subs-espec");
   if (existing) existing.remove();
   containerEl.insertAdjacentHTML("beforeend", html);
-
-  // Update select states
-  const baseJ = calcValorPericia(pericia);
-  ativas.forEach(s => {
-    const eId  = `espec-ded-${cssId(s.nome)}`;
-    const mId  = `mod-ded-${cssId(s.nome)}`;
-    const tId  = `tot-ded-${cssId(s.nome)}`;
-    const sel  = document.getElementById(eId);
-    const modEl= document.getElementById(mId);
-    const totEl= document.getElementById(tId);
-    const atual= especJustiça[s.nome] || "";
-    if (sel) {
-      sel.value = atual;
-      sel.className = "espec-select" + (atual ? " " + ESPEC_CONFIG[atual].classe : "");
-      Array.from(sel.options).forEach(opt => {
-        const t = opt.value;
-        if (t === "" || t === atual) { opt.disabled = false; return; }
-        opt.disabled = !podeEscolherEspec(t, atual);
-      });
-    }
-    if (modEl) {
-      if (atual) {
-        const m = ESPEC_CONFIG[atual].mod;
-        modEl.textContent = (m > 0 ? "+" : "") + m;
-        modEl.className = "espec-modificador " + (m > 0 ? "mod-pos" : "mod-neg");
-      } else {
-        modEl.textContent = "";
-        modEl.className = "espec-modificador";
-      }
-    }
-    if (totEl) {
-      const m = atual ? ESPEC_CONFIG[atual].mod : 0;
-      totEl.textContent = baseJ + m;
-    }
-  });
 }
 
 
@@ -1409,10 +1366,9 @@ function calcAtualizarSubpericias() {
     sel.appendChild(opt);
   });
   dedicAtivas.forEach(s => {
-    const mod = especJustiça?.[s.nome] ? (ESPEC_CONFIG[especJustiça[s.nome]]?.mod || 0) : 0;
     const opt = document.createElement("option");
     opt.value = s.nome;
-    opt.textContent = `${s.nome}${mod !== 0 ? ` (${mod > 0 ? "+" : ""}${mod})` : ""}`;
+    opt.textContent = s.nome; // Dedicação não tem especialização — sem mod a exibir
     sel.appendChild(opt);
   });
 
@@ -1429,21 +1385,24 @@ function calcAtualizarEspec() {
 
   let mod = 0;
   let label = "—";
+  let tipo = "";
 
   // Direct specialization (Poder, no subperícia select shown)
   const hasDirect = atrib === "Poder" && pericia && especPericias?.[pericia] &&
     (ESPEC_CONFIG[especPericias[pericia]]?.mod || 0) !== 0;
 
   if (hasDirect && !sub) {
-    mod = ESPEC_CONFIG[especPericias[pericia]]?.mod || 0;
-    const key = especPericias[pericia];
-    const name = ESPEC_CONFIG[key]?.label || key;
+    tipo = especPericias[pericia];
+    mod = ESPEC_CONFIG[tipo]?.mod || 0;
+    const name = ESPEC_CONFIG[tipo]?.label || tipo;
     label = `${name} (${mod > 0 ? "+" : ""}${mod}) — auto`;
   } else if (sub && sub !== "__poder__") {
-    mod = calcModEspecSub(sub);
+    tipo = tipoEspecPorNome(sub);
+    mod = ESPEC_CONFIG[tipo]?.mod || 0;
     if (mod !== 0) label = `${mod > 0 ? "+" : ""}${mod}`;
   } else if (sub === "__poder__" && pericia) {
-    mod = ESPEC_CONFIG[especPericias?.[pericia]]?.mod || 0;
+    tipo = especPericias?.[pericia] || "";
+    mod = ESPEC_CONFIG[tipo]?.mod || 0;
     if (mod !== 0) label = `${mod > 0 ? "+" : ""}${mod}`;
   }
 
@@ -1451,6 +1410,14 @@ function calcAtualizarEspec() {
   el.dataset.label = mod !== 0 ? (hasDirect && !sub ? label : `${sub||pericia} (${mod > 0 ? "+" : ""}${mod})`) : "";
   el.textContent   = label;
   el.style.color   = mod > 0 ? "#44ff88" : mod < 0 ? "#ff8888" : "#9ab";
+
+  // Muito Bom aplica vantagem automaticamente na rolagem; Muito Ruim aplica
+  // desvantagem. Nos demais casos volta para Normal. O jogador ainda pode trocar
+  // manualmente depois — isso só define o padrão ao escolher a especialização.
+  const cfg = ESPEC_CONFIG[tipo];
+  const vantVal = cfg?.vantagem ? "vant" : cfg?.desvantagem ? "desvant" : "normal";
+  const radio = document.querySelector(`input[name="calc-vant"][value="${vantVal}"]`);
+  if (radio) radio.checked = true;
 }
 
 function calcAtualizarRudInfo() {
@@ -2243,10 +2210,10 @@ ATRIBUTOS.forEach(atrib=>{
       ${isPoderEsp ? `
         <select class="espec-select" id="espec-per-${pEsc}" onchange="setEspecPericia('${p}',this.value)">
           <option value="">— Especialização —</option>
-          <option value="mb">Muito Bom (+5)</option>
+          <option value="mb">Muito Bom (+3, Vantagem)</option>
           <option value="b">Bom (+3)</option>
           <option value="r">Ruim (−3)</option>
-          <option value="mr">Muito Ruim (−5)</option>
+          <option value="mr">Muito Ruim (−3, Desvantagem)</option>
         </select>
         <span class="espec-modificador" id="mod-per-${pEsc}"></span>
         <span class="pericia-total" id="tot-per-${pEsc}"></span>
@@ -2276,10 +2243,10 @@ ATRIBUTOS.forEach(atrib=>{
         <div class="subpericia-nome">${s}</div>
         <select class="espec-select" id="espec-${sEsc}" onchange="setEspecFixa('${s}',this.value)">
           <option value="">— Especialização —</option>
-          <option value="mb">Muito Bom (+5)</option>
+          <option value="mb">Muito Bom (+3, Vantagem)</option>
           <option value="b">Bom (+3)</option>
           <option value="r">Ruim (−3)</option>
-          <option value="mr">Muito Ruim (−5)</option>
+          <option value="mr">Muito Ruim (−3, Desvantagem)</option>
         </select>
         <span class="espec-modificador" id="mod-${sEsc}"></span>
         <span class="pericia-total" id="tot-${sEsc}"></span>
@@ -3050,6 +3017,10 @@ function renderBonusConexao() {
           <div class="bc-ded-grid">${inputs}</div>
         </div>`;
       }
+      periRow += `<div style="font-size:0.74em;color:#888;margin-top:-2px;">
+        PP de Dedicação livres para habilidades/feitiços: <b style="color:${ppDedDisponivel()>0?"#2a6e00":"#888"}">${ppDedDisponivel()}</b>
+        — não precisa distribuir tudo nas perícias acima; o que sobrar pode ser usado como fonte de PP ao adquirir uma habilidade ou feitiço.
+      </div>`;
     }
   });
 
@@ -3104,7 +3075,11 @@ function mudarPPDed(rud, nv, pericia, delta) {
   if (typeof fichaMarcaDirty === "function") fichaMarcaDirty();
 }
 
-// Total de PP de Justiça extras para uma perícia (de todos os pools)
+// Total de PP de Justiça extras para uma perícia (de todos os pools), já descontando
+// o que tiver sido redirecionado para habilidades via fonte "PP de Perícia" (a alocação
+// original em progState.ppDedPool não é alterada — isso mantém o "Restantes: X/8" de
+// cada nível estável; só o valor EFETIVO da perícia é reduzido, igual ao que já acontece
+// com PP de Upagem distribuído em uma perícia e depois gasto em uma habilidade).
 function totalPPDedPorPericia(pericia) {
   let total = 0;
   ["prim","sec"].forEach(rud => {
@@ -3112,7 +3087,7 @@ function totalPPDedPorPericia(pericia) {
       total += pool[pericia] || 0;
     });
   });
-  return total;
+  return Math.max(0, total - (ppGastoHabilidadesDed[pericia] || 0));
 }
 
 // Soma total de bônus +2 automático para todas as perícias do atributo conectado
@@ -3471,11 +3446,15 @@ function ppUpagemDisponivel() {
   const gastoEmPericias = Object.values(ppProgressao).reduce((s,v) => s+v, 0)
     + Object.values(ppGastoHabilidadesProg).reduce((s,v) => s+v, 0);
   // How much was spent to habs/feitiços via tipo:"upagem" fontes
+  // (exclui a habilidade/feitiço em edição para não contar o PP dela duas vezes
+  // — uma vez aqui via fontes salvas, outra via habFontesTemp/_feiticoFontesTemp)
   const gastoEmHabs = habilidades
+    .filter(h => h.id !== _habEditId)
     .flatMap(h => h.fontes || [])
     .filter(f => f.tipo === "upagem")
     .reduce((s,f) => s + f.pp, 0);
   const gastoEmFeiticos = feiticos
+    .filter(f2 => f2.id !== _feiticoEditId)
     .flatMap(f2 => f2.fontes || [])
     .filter(f => f.tipo === "upagem")
     .reduce((s,f) => s + f.pp, 0);
@@ -3498,6 +3477,68 @@ function ppUpagemDisponiveisExcluindo(formType, excluirIdx) {
   } else if (formType === "feitico" && excluirIdx >= 0) {
     const f = (_feiticoFontesTemp||[])[excluirIdx];
     if (f && f.tipo === "upagem") excPP = f.pp || 0;
+  }
+  return base + excPP;
+}
+
+// ── PP de Dedicação (Justiça) ─────────────────────────────────────────────────
+// Cada nível de Justiça com bônus "pp_ded" concede 8 PP que normalmente vão só
+// para as perícias de Justiça (progState.ppDedPool). O que não for distribuído
+// nessas perícias fica livre para ser usado como fonte em habilidades/feitiços
+// — mesmo princípio do Pool de Upagem, mas com o total vindo do ppDedPool.
+function ppDedTotalGeral() {
+  let total = 0;
+  ["prim","sec"].forEach(rud => {
+    const atrib = rud === "prim" ? progState.primario : progState.secundario;
+    const nivel = rud === "prim" ? progState.nivelPrimario : progState.nivelSecundario;
+    if (atrib !== "Justiça" || !nivel) return;
+    for (let nv = 2; nv <= nivel; nv++) {
+      if (nivelTemPPDed(atrib, nv)) total += 8;
+    }
+  });
+  return total;
+}
+
+function ppDedGastoPericias() {
+  let total = 0;
+  ["prim","sec"].forEach(rud => {
+    Object.values(progState.ppDedPool[rud] || {}).forEach(pool => {
+      total += Object.values(pool).reduce((s,v) => s+v, 0);
+    });
+  });
+  return total;
+}
+
+function ppDedDisponivel() {
+  const totalGeral     = ppDedTotalGeral();
+  const gastoPericias  = ppDedGastoPericias();
+  const gastoEmHabs = habilidades
+    .filter(h => h.id !== _habEditId)
+    .flatMap(h => h.fontes || [])
+    .filter(f => f.tipo === "ppded")
+    .reduce((s,f) => s + f.pp, 0);
+  const gastoEmFeiticos = feiticos
+    .filter(f2 => f2.id !== _feiticoEditId)
+    .flatMap(f2 => f2.fontes || [])
+    .filter(f => f.tipo === "ppded")
+    .reduce((s,f) => s + f.pp, 0);
+  const comprometidoHab = habFontesTemp
+    .filter(f => f.tipo === "ppded").reduce((s,f) => s+f.pp, 0);
+  const comprometidoFeit = (_feiticoFontesTemp||[])
+    .filter(f => f.tipo === "ppded").reduce((s,f) => s+f.pp, 0);
+  return Math.max(0, totalGeral - gastoPericias - gastoEmHabs - gastoEmFeiticos
+    - comprometidoHab - comprometidoFeit);
+}
+
+function ppDedDisponiveisExcluindo(formType, excluirIdx) {
+  const base = ppDedDisponivel();
+  let excPP = 0;
+  if (formType === "hab" && excluirIdx >= 0) {
+    const f = habFontesTemp[excluirIdx];
+    if (f && f.tipo === "ppded") excPP = f.pp || 0;
+  } else if (formType === "feitico" && excluirIdx >= 0) {
+    const f = (_feiticoFontesTemp||[])[excluirIdx];
+    if (f && f.tipo === "ppded") excPP = f.pp || 0;
   }
   return base + excPP;
 }
@@ -4503,6 +4544,7 @@ function renderPopupNivel() {
           <button type="button" onclick="uparPPDed('${rud}',${proximoNivel},'${p}',+1)">+</button>
         </div>`;
       }).join("")}
+      <div style="font-size:0.74em;color:#888;margin-top:6px;">Não precisa distribuir tudo agora — o que sobrar fica disponível como "PP de Dedicação" para usar em habilidades/feitiços.</div>
     </div>`;
   }
 
@@ -4875,9 +4917,15 @@ let habNextId = 1;
 // Fontes temporárias ao preencher o form
 let habFontesTemp = []; // [{pericia, pp}]
 
-// PP total atual de uma perícia (base + progressão) — o pool unificado
+// Edição de habilidade existente: null = formulário em modo "nova", number = editando esse id
+let _habEditId = null;
+// Cópia das fontes originais da habilidade em edição (para reverter a dedução corretamente ao salvar)
+let _habEditOriginalFontes = null;
+
+// PP total atual de uma perícia (base + progressão + dedicação) — o pool unificado
 function ppTotalPericia(p) {
-  return (pericias[p] || 0) + (ppProgressao[p] || 0);
+  return (pericias[p] || 0) + (ppProgressao[p] || 0)
+    + (typeof totalPPDedPorPericia === "function" ? totalPPDedPorPericia(p) : 0);
 }
 
 // PP já comprometidos nessa perícia pelas fontes temporárias (excluindo idx)
@@ -4890,7 +4938,20 @@ function ppTempComprometido(pericia, excluirIdx = -1) {
 
 // PP disponível líquido (total - já gasto em habilidades confirmadas - comprometido no form)
 function ppLiquidoHab(pericia, excluirIdx = -1) {
-  return ppTotalPericia(pericia) - ppTempComprometido(pericia, excluirIdx);
+  let disp = ppTotalPericia(pericia) - ppTempComprometido(pericia, excluirIdx);
+  // Se estamos editando uma habilidade existente, o que ela já tinha alocado nesta
+  // perícia ainda está "preso" em pericias[]/ppProgressao[] (dedução permanente) —
+  // devolve esse valor aqui para que o form possa realocar livremente.
+  if (_habEditId !== null) {
+    const habEditando = habilidades.find(h => h.id === _habEditId);
+    if (habEditando) {
+      const jaAlocadoNestaPericia = (habEditando.fontes || [])
+        .filter(f => f.tipo === "pericia" && f.pericia === pericia)
+        .reduce((s, f) => s + (f.pp || 0), 0);
+      disp += jaAlocadoNestaPericia;
+    }
+  }
+  return disp;
 }
 
 function habCustoTotal() {
@@ -4925,11 +4986,14 @@ function ppLivresAtrib(atrib) {
     .reduce((s, f) => s + f.pp, 0);
 
   // PP livres já gastos em habilidades confirmadas com fonte "livre" neste atributo
+  // (exclui a habilidade/feitiço em edição — ver explicação em ppUpagemDisponivel)
   const gastoHabLivre = habilidades
+    .filter(h => h.id !== _habEditId)
     .flatMap(h => h.fontes || [])
     .filter(f => f.tipo === "livre" && f.atrib === atrib)
     .reduce((s, f) => s + f.pp, 0);
   const gastoFeiticoLivre = feiticos
+    .filter(f2 => f2.id !== _feiticoEditId)
     .flatMap(f2 => f2.fontes || [])
     .filter(f => f.tipo === "livre" && f.atrib === atrib)
     .reduce((s, f) => s + f.pp, 0);
@@ -4953,9 +5017,32 @@ function ppLivresAtribExcluindo(atrib, formType, excluirIdx) {
   return base + excPP;
 }
 
+// Calcula o disponível para a fonte `f` (já considerando o tipo dela), usado para
+// limitar o input numérico e mostrar "restantes" na linha da fonte.
+function habFonteDisponivel(f, idx) {
+  if (f.tipo === "upagem") return ppUpagemDisponiveisExcluindo("hab", idx);
+  if (f.tipo === "ppded")  return ppDedDisponiveisExcluindo("hab", idx);
+  if (f.tipo === "livre")  return ppLivresAtribExcluindo(f.atrib, "hab", idx);
+  return ppLiquidoHab(f.pericia, idx);
+}
+
 function renderHabFontes() {
   const cont = document.getElementById("hab-fontes-cont");
   if (!cont) return;
+
+  // Editando uma habilidade "grátis" (concedida por progressão) — não tem custo de PP
+  const habEditando  = _habEditId !== null ? habilidades.find(h => h.id === _habEditId) : null;
+  const ehGratisEdit = !!habEditando?.gratis;
+  const fonteBox = document.getElementById("hab-pp-fonte-box");
+  if (ehGratisEdit) {
+    if (fonteBox) fonteBox.style.display = "none";
+    const btn  = document.getElementById("hab-btn-confirmar");
+    const nome = document.getElementById("hab-form-nome")?.value?.trim();
+    if (btn) btn.disabled = !nome;
+    return;
+  }
+  if (fonteBox) fonteBox.style.display = "";
+
   const custo   = habCustoTotal();
   const alocado = habFontesTotalAlocado();
   const falta   = custo - alocado;
@@ -4963,9 +5050,7 @@ function renderHabFontes() {
   let html = "";
   habFontesTemp.forEach((f, idx) => {
     const isLivre = f.tipo === "livre";
-    const disponivel = isLivre
-      ? ppLivresAtribExcluindo(f.atrib, "hab", idx)
-      : ppLiquidoHab(f.pericia, idx);
+    const disponivel = habFonteDisponivel(f, idx);
     const restante = disponivel - f.pp;
     const restCor  = restante < 0 ? "#c00" : restante === 0 ? "#080" : "#555";
     html += `<div class="hab-pp-pericia-row">
@@ -4975,6 +5060,14 @@ function renderHabFontes() {
             const dU = ppUpagemDisponiveisExcluindo("hab", f.tipo==="upagem" ? idx : -1);
             return `<option value="upagem:" ${f.tipo==="upagem"?"selected":""} ${dU<=0&&f.tipo!=="upagem"?"disabled":""}>
               PP de Upagem (${dU} disp.)
+            </option>`;
+          })()}
+        </optgroup>
+        <optgroup label="PP de Dedicação">
+          ${(() => {
+            const dD = ppDedDisponiveisExcluindo("hab", f.tipo==="ppded" ? idx : -1);
+            return `<option value="ppded:" ${f.tipo==="ppded"?"selected":""} ${dD<=0&&f.tipo!=="ppded"?"disabled":""}>
+              PP de Dedicação (${dD} disp.)
             </option>`;
           })()}
         </optgroup>
@@ -5041,6 +5134,11 @@ function addHabFonte() {
     habFontesTemp.push({ tipo: "upagem", atrib: "", pericia: "", pp: 1 });
     renderHabFontes(); return;
   }
+  // Then PP de Dedicação (Justiça) não distribuídos em perícia
+  if (ppDedDisponivel() > 0) {
+    habFontesTemp.push({ tipo: "ppded", atrib: "", pericia: "", pp: 1 });
+    renderHabFontes(); return;
+  }
   // Then atrib livre
   for (const atrib of ATRIBUTOS) {
     if (ppLivresAtrib(atrib) > 0) {
@@ -5070,9 +5168,9 @@ function remHabFonte(idx) {
 function setHabFonteTipo(idx, val) {
   const [tipo, key] = val.split(":");
   habFontesTemp[idx].tipo = tipo;
-  if (tipo === "upagem") {
+  if (tipo === "upagem" || tipo === "ppded") {
     habFontesTemp[idx].atrib = ""; habFontesTemp[idx].pericia = "";
-    const disp = ppUpagemDisponiveisExcluindo("hab", idx);
+    const disp = habFonteDisponivel(habFontesTemp[idx], idx);
     if ((habFontesTemp[idx].pp||0) > disp) habFontesTemp[idx].pp = Math.max(0, disp);
   } else if (tipo === "livre") {
     habFontesTemp[idx].atrib   = key;
@@ -5098,17 +5196,11 @@ function setHabFontePericia(idx, val) {
 
 function setHabFontePP(idx, val) {
   const f = habFontesTemp[idx];
-  let disp;
-  if (f.tipo === "upagem") {
-    disp = ppUpagemDisponiveisExcluindo("hab", idx);
-  } else if (f.tipo === "livre") {
-    disp = ppLivresAtribExcluindo(f.atrib, "hab", idx);
-  } else {
-    disp = ppLiquidoHab(f.pericia, idx);
-  }
+  const disp = habFonteDisponivel(f, idx);
   f.pp = Math.max(0, Math.min(val, disp));
   renderHabFontes();
 }
+
 
 function habAtualizarCusto() {
   const tipo = document.getElementById("hab-form-tipo")?.value || "0";
@@ -5120,6 +5212,76 @@ function habAtualizarCusto() {
   }
   renderHabFontes();
 }
+
+// ── Dedução/devolução de PP de fontes do tipo "perícia" ───────────────────────
+// "livre", "upagem" e "ppded" são pools calculados dinamicamente a partir de
+// habilidades[]/feiticos[] — não precisam de dedução/devolução manual, basta
+// adicionar/remover a habilidade do array. Já "pericia" deduz diretamente do
+// valor efetivo da perícia (ppProgressao[] → progState.ppDedPool → pericias[]),
+// então guardamos o split exato (dedProg/dedJustica/dedBase) em cada fonte para
+// poder desfazer com precisão depois (ex: ao remover ou editar a habilidade).
+function habAplicarFontesPericia(fontes) {
+  (fontes || []).forEach(f => {
+    if (f.tipo === "livre" || f.tipo === "upagem" || f.tipo === "ppded") {
+      f.dedProg = 0; f.dedBase = 0; f.dedJustica = 0;
+      return;
+    }
+    let restante    = f.pp;
+    const progDisp  = ppProgressao[f.pericia] || 0;
+    const dedProg   = Math.min(restante, progDisp);
+    ppProgressao[f.pericia] = progDisp - dedProg;
+    ppGastoHabilidadesProg[f.pericia] = (ppGastoHabilidadesProg[f.pericia] || 0) + dedProg;
+    restante -= dedProg;
+
+    let dedJustica = 0;
+    if (restante > 0) {
+      const dedDisp = totalPPDedPorPericia(f.pericia);
+      dedJustica = Math.min(restante, dedDisp);
+      if (dedJustica > 0) {
+        ppGastoHabilidadesDed[f.pericia] = (ppGastoHabilidadesDed[f.pericia] || 0) + dedJustica;
+        restante -= dedJustica;
+      }
+    }
+
+    let dedBase = 0;
+    if (restante > 0) {
+      dedBase = Math.min(restante, pericias[f.pericia] || 0);
+      pericias[f.pericia] = Math.max(0, (pericias[f.pericia] || 0) - dedBase);
+      ppGastoHabilidades[f.pericia] = (ppGastoHabilidades[f.pericia] || 0) + dedBase;
+    }
+    f.dedProg = dedProg;
+    f.dedJustica = dedJustica;
+    f.dedBase = dedBase;
+  });
+}
+
+function habReverterFontesPericia(fontes) {
+  (fontes || []).forEach(f => {
+    if (f.tipo === "livre" || f.tipo === "upagem" || f.tipo === "ppded") return; // dinâmico, nada a desfazer
+
+    let dedProg = f.dedProg, dedBase = f.dedBase, dedJustica = f.dedJustica;
+    if (typeof dedProg !== "number" || typeof dedBase !== "number") {
+      // Fonte salva antes desta atualização (sem split exato registrado) — aproxima
+      // devolvendo primeiro o que estiver computado como gasto via progressão.
+      const totalPP = f.pp || 0;
+      dedProg = Math.min(totalPP, ppGastoHabilidadesProg[f.pericia] || 0);
+      dedBase = totalPP - dedProg;
+      dedJustica = 0;
+    }
+    if (dedProg > 0) {
+      ppProgressao[f.pericia] = (ppProgressao[f.pericia] || 0) + dedProg;
+      ppGastoHabilidadesProg[f.pericia] = Math.max(0, (ppGastoHabilidadesProg[f.pericia] || 0) - dedProg);
+    }
+    if (dedJustica > 0) {
+      ppGastoHabilidadesDed[f.pericia] = Math.max(0, (ppGastoHabilidadesDed[f.pericia] || 0) - dedJustica);
+    }
+    if (dedBase > 0) {
+      pericias[f.pericia] = (pericias[f.pericia] || 0) + dedBase;
+      ppGastoHabilidades[f.pericia] = Math.max(0, (ppGastoHabilidades[f.pericia] || 0) - dedBase);
+    }
+  });
+}
+
 
 
 
@@ -5268,70 +5430,135 @@ function selecionarHabCatalogo(idx, arq, tipo, atrib) {
 }
 
 function confirmarHabilidade() {
-  const nome  = document.getElementById("hab-form-nome")?.value?.trim();
-  const desc  = document.getElementById("hab-form-desc")?.value?.trim() || "";
-  const tipo  = document.getElementById("hab-form-tipo")?.value || "0";
-  const custo = habCustoTotal();
+  const nome = document.getElementById("hab-form-nome")?.value?.trim();
+  const desc = document.getElementById("hab-form-desc")?.value?.trim() || "";
+  const tipo = document.getElementById("hab-form-tipo")?.value || "0";
   if (!nome) { alert("Insira o nome da habilidade."); return; }
-  if (habFontesTotalAlocado() < custo) { alert("PP insuficientes alocados."); return; }
 
-  // Deduct PP from sources
-  habFontesTemp.forEach(f => {
-    if (f.tipo === "livre") {
-      // PP livres: deduct from progressao first, then from nivel1 pool of the atrib
-      // We track via ppGastoLivreAtrib per atrib
-      // Actually stored on the hab.fontes for accounting — no direct pool to deduct
-      // The pool is computed dynamically from ppLivresAtrib(), so just record the fonte
-      // Nothing to deduct here — ppLivresAtrib() already subtracts gastoHabLivre
-    } else {
-      let restante = f.pp;
-      const progDisp = ppProgressao[f.pericia] || 0;
-      const dedProg  = Math.min(restante, progDisp);
-      ppProgressao[f.pericia] = progDisp - dedProg;
-      ppGastoHabilidadesProg[f.pericia] = (ppGastoHabilidadesProg[f.pericia] || 0) + dedProg;
-      restante -= dedProg;
-      if (restante > 0) {
-        const dedBase = Math.min(restante, pericias[f.pericia] || 0);
-        pericias[f.pericia] = Math.max(0, (pericias[f.pericia] || 0) - dedBase);
-        ppGastoHabilidades[f.pericia] = (ppGastoHabilidades[f.pericia] || 0) + dedBase;
-      }
-    }
-  });
+  const isEdit = _habEditId !== null;
+  const idx    = isEdit ? habilidades.findIndex(h => h.id === _habEditId) : -1;
+  if (isEdit && idx === -1) { habCancelarEdicao(); return; }
+  const habAntiga = isEdit ? habilidades[idx] : null;
+  const ehGratis  = isEdit && habAntiga.gratis;
 
-  // Infer atrib from fontes — pericia → livre → upagem → catalog selection
+  const custo = habCustoTotal();
+  if (!ehGratis && habFontesTotalAlocado() < custo) { alert("PP insuficientes alocados."); return; }
+
   let habAtrib = "";
-  // First try: get from catalog selection (stored in form dataset)
-  const catAtrib = document.getElementById("hab-form-nome")?.dataset?.catAtrib || "";
-  if (catAtrib) habAtrib = catAtrib;
-  // Then try from fontes
-  if (!habAtrib) {
-    for (const f of habFontesTemp) {
-      if (f.tipo === "pericia" && f.pericia) {
-        for (const atrib of ATRIBUTOS) {
-          if (PERICIAS_POR_ATRIBUTO[atrib]?.includes(f.pericia)) { habAtrib = atrib; break; }
-        }
-      } else if ((f.tipo === "livre" || f.tipo === "upagem") && f.atrib) {
-        habAtrib = f.atrib;
-      }
-      if (habAtrib) break;
-    }
-  }
-  const novaHab = { id: habNextId++, nome, desc, tipo, fontes: [...habFontesTemp], atrib: habAtrib };
-  habilidades.push(novaHab);
-  const temEfeito = habAplicarEfeito(novaHab);
-  if (temEfeito) habMostrarAviso(`Efeito de "${nome}" aplicado na ficha.`, "ok");
+  if (!ehGratis) {
+    // Se estiver editando, devolve a dedução original antes de aplicar a nova,
+    // para não acumular gasto duplicado nas perícias/progressão.
+    if (isEdit) habReverterFontesPericia(_habEditOriginalFontes || habAntiga.fontes);
+    habAplicarFontesPericia(habFontesTemp);
 
-  // Clear form
-  document.getElementById("hab-form-nome").value = "";
-  document.getElementById("hab-form-tipo").value = "0";
-  if (document.getElementById("hab-form-desc")) document.getElementById("hab-form-desc").value = "";
+    // Infer atrib from fontes — pericia → livre → upagem → catalog selection
+    const catAtrib = document.getElementById("hab-form-nome")?.dataset?.catAtrib || "";
+    if (catAtrib) habAtrib = catAtrib;
+    if (!habAtrib) {
+      for (const f of habFontesTemp) {
+        if (f.tipo === "pericia" && f.pericia) {
+          for (const atrib of ATRIBUTOS) {
+            if (PERICIAS_POR_ATRIBUTO[atrib]?.includes(f.pericia)) { habAtrib = atrib; break; }
+          }
+        } else if ((f.tipo === "livre" || f.tipo === "upagem") && f.atrib) {
+          habAtrib = f.atrib;
+        }
+        if (habAtrib) break;
+      }
+    }
+    if (!habAtrib && isEdit) habAtrib = habAntiga.atrib || "";
+  } else {
+    habAtrib = habAntiga.atrib || "";
+  }
+
+  const fontesFinais = ehGratis ? [] : [...habFontesTemp];
+
+  if (isEdit) {
+    // Efeito só é desfeito/reaplicado se o nome mudou (efeitos são chaveados por nome
+    // e os campos internos do efeito — ex: hab._grandalhao_pv — já são preservados
+    // pelo spread abaixo quando o nome permanece o mesmo).
+    if (HAB_EFFECTS[habAntiga.nome] && habAntiga.nome !== nome) {
+      try { HAB_EFFECTS[habAntiga.nome].undo(habAntiga); } catch(e) { console.warn("Erro ao desfazer efeito antigo:", habAntiga.nome, e); }
+    }
+    const habAtualizada = { ...habAntiga, nome, desc, tipo, fontes: fontesFinais, atrib: habAtrib };
+    habilidades[idx] = habAtualizada;
+    if (HAB_EFFECTS[nome] && habAntiga.nome !== nome) {
+      const temEfeito = habAplicarEfeito(habAtualizada);
+      if (temEfeito) habMostrarAviso(`Efeito de "${nome}" aplicado na ficha.`, "ok");
+    } else {
+      refreshHabBadges();
+    }
+    habMostrarAviso(`Habilidade "${nome}" atualizada.`, "ok");
+    _habEditId = null;
+    _habEditOriginalFontes = null;
+  } else {
+    const novaHab = { id: habNextId++, nome, desc, tipo, fontes: fontesFinais, atrib: habAtrib };
+    habilidades.push(novaHab);
+    const temEfeito = habAplicarEfeito(novaHab);
+    if (temEfeito) habMostrarAviso(`Efeito de "${nome}" aplicado na ficha.`, "ok");
+  }
+
+  // Reseta o formulário para o modo "nova habilidade"
   habFontesTemp = [];
-  habAtualizarCusto();
+  habResetFormUI();
 
   atualizarUI();
   renderHabLista();
   renderHabFontes();
   renderCatalogoBrowser();
+}
+
+// Abre o formulário (já existente na página) em modo edição para a habilidade `id`.
+function habEditar(id) {
+  const hab = habilidades.find(h => h.id === id);
+  if (!hab) return;
+
+  _habEditId = id;
+  _habEditOriginalFontes = (hab.fontes || []).map(f => ({ ...f }));
+  habFontesTemp = hab.gratis ? [] : (hab.fontes || []).map(f => ({ ...f }));
+
+  const nomeEl = document.getElementById("hab-form-nome");
+  if (nomeEl) { nomeEl.value = hab.nome || ""; delete nomeEl.dataset.catAtrib; }
+  const descEl = document.getElementById("hab-form-desc");
+  if (descEl) descEl.value = hab.desc || "";
+  const tipoEl = document.getElementById("hab-form-tipo");
+  if (tipoEl) tipoEl.value = hab.tipo || "0";
+
+  const titulo = document.getElementById("hab-form-titulo");
+  if (titulo) titulo.textContent = `Editar Habilidade — "${hab.nome}"`;
+  const btnConfirmar = document.getElementById("hab-btn-confirmar");
+  if (btnConfirmar) btnConfirmar.textContent = "Salvar Edição";
+  const btnCancelar = document.getElementById("hab-btn-cancelar-edicao");
+  if (btnCancelar) btnCancelar.style.display = "";
+
+  habAtualizarCusto();
+  renderHabFontes();
+  nomeEl?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function habCancelarEdicao() {
+  _habEditId = null;
+  _habEditOriginalFontes = null;
+  habFontesTemp = [];
+  habResetFormUI();
+  renderHabFontes();
+}
+
+// Restaura o formulário de habilidade ao estado padrão ("Adquirir Habilidade")
+function habResetFormUI() {
+  const nomeEl = document.getElementById("hab-form-nome");
+  if (nomeEl) { nomeEl.value = ""; delete nomeEl.dataset.catAtrib; }
+  const tipoEl = document.getElementById("hab-form-tipo");
+  if (tipoEl) tipoEl.value = "0";
+  const descEl = document.getElementById("hab-form-desc");
+  if (descEl) descEl.value = "";
+  const titulo = document.getElementById("hab-form-titulo");
+  if (titulo) titulo.textContent = "Adquirir Habilidade";
+  const btnConfirmar = document.getElementById("hab-btn-confirmar");
+  if (btnConfirmar) btnConfirmar.textContent = "Confirmar Habilidade";
+  const btnCancelar = document.getElementById("hab-btn-cancelar-edicao");
+  if (btnCancelar) btnCancelar.style.display = "none";
+  habAtualizarCusto();
 }
 
 
@@ -5528,6 +5755,15 @@ function feiticoPPDisponivel(pericia, excluirIdx = -1) {
   return total - emOutrosFeiticos - emHabs - emFormOutras;
 }
 
+// Calcula o disponível para a fonte `f` (já considerando o tipo dela) — mesmo
+// princípio do habFonteDisponivel, usado para limitar o input e mostrar "restantes".
+function feiticoFonteDisponivel(f, idx) {
+  if (f.tipo === "upagem") return ppUpagemDisponiveisExcluindo("feitico", idx);
+  if (f.tipo === "ppded")  return ppDedDisponiveisExcluindo("feitico", idx);
+  if (f.tipo === "livre")  return ppLivresAtribExcluindo(f.atrib, "feitico", idx);
+  return feiticoPPDisponivel(f.pericia, idx);
+}
+
 function feiticoRenderFontes() {
   const cont = document.getElementById("feitico-fontes-cont");
   if (!cont) return;
@@ -5539,9 +5775,7 @@ function feiticoRenderFontes() {
 
   cont.innerHTML = _feiticoFontesTemp.map((ft, idx) => {
     const isLivre = ft.tipo === "livre";
-    const disp = isLivre
-      ? ppLivresAtribExcluindo(ft.atrib, "feitico", idx)
-      : feiticoPPDisponivel(ft.pericia, idx);
+    const disp = feiticoFonteDisponivel(ft, idx);
     const restante = disp - ft.pp;
     const cor = restante < 0 ? "#c00" : restante === 0 ? "#080" : "#888";
     return `<div class="feitico-fonte-linha">
@@ -5550,6 +5784,12 @@ function feiticoRenderFontes() {
           ${(() => {
             const dU = ppUpagemDisponiveisExcluindo("feitico", ft.tipo==="upagem" ? idx : -1);
             return `<option value="upagem:" ${ft.tipo==="upagem"?"selected":""} ${dU<=0&&ft.tipo!=="upagem"?"disabled":""}>PP de Upagem (${dU} disp.)</option>`;
+          })()}
+        </optgroup>
+        <optgroup label="PP de Dedicação">
+          ${(() => {
+            const dD = ppDedDisponiveisExcluindo("feitico", ft.tipo==="ppded" ? idx : -1);
+            return `<option value="ppded:" ${ft.tipo==="ppded"?"selected":""} ${dD<=0&&ft.tipo!=="ppded"?"disabled":""}>PP de Dedicação (${dD} disp.)</option>`;
           })()}
         </optgroup>
         <optgroup label="PP Livres por Atributo">
@@ -5580,6 +5820,10 @@ function feiticoAdicionarFonte() {
     _feiticoFontesTemp.push({ tipo: "upagem", atrib: "", pericia: "", pp: 1 });
     feiticoRenderFontes(); return;
   }
+  if (ppDedDisponivel() > 0) {
+    _feiticoFontesTemp.push({ tipo: "ppded", atrib: "", pericia: "", pp: 1 });
+    feiticoRenderFontes(); return;
+  }
   for (const a of ATRIBUTOS) {
     if (ppLivresAtrib(a) > 0) {
       _feiticoFontesTemp.push({ tipo: "livre", atrib: a, pericia: "", pp: 1 });
@@ -5607,9 +5851,9 @@ function feiticoRemoverFonte(idx) {
 function feiticoSetFonteTipo(idx, val) {
   const [tipo, key] = val.split(":");
   _feiticoFontesTemp[idx].tipo = tipo;
-  if (tipo === "upagem") {
+  if (tipo === "upagem" || tipo === "ppded") {
     _feiticoFontesTemp[idx].atrib = ""; _feiticoFontesTemp[idx].pericia = "";
-    const disp = ppUpagemDisponiveisExcluindo("feitico", idx);
+    const disp = feiticoFonteDisponivel(_feiticoFontesTemp[idx], idx);
     if ((_feiticoFontesTemp[idx].pp||0) > disp) _feiticoFontesTemp[idx].pp = Math.max(0, disp);
   } else if (tipo === "livre") {
     _feiticoFontesTemp[idx].atrib   = key;
@@ -5633,7 +5877,7 @@ function feiticoSetFontePericia(idx, val) {
 }
 
 function feiticoSetFontePP(idx, val) {
-  const disp = feiticoPPDisponivel(_feiticoFontesTemp[idx].pericia, idx);
+  const disp = feiticoFonteDisponivel(_feiticoFontesTemp[idx], idx);
   _feiticoFontesTemp[idx].pp = Math.max(0, Math.min(val, disp));
   feiticoRenderFontes();
 }
@@ -5814,7 +6058,8 @@ HAB_EFFECTS["ALINHADO PELO MEIO:"] = {
 };
 
 // Lista todas as subperícias/especializações "ativas" da ficha, de todas as fontes
-// (fixas, diretas em Poder, subperícias de Justiça desbloqueadas, e subperícias livres)
+// (fixas, diretas em Poder, e subperícias livres — Dedicação/Justiça não entra
+// pois não possui especialização)
 function habAlinhadoListarSubs() {
   const lista = [];
   Object.keys(especFixas).forEach(nome => {
@@ -5822,11 +6067,6 @@ function habAlinhadoListarSubs() {
   });
   Object.keys(especPericias).forEach(nome => {
     lista.push({ nome, tier: especPericias[nome] || "", fonte: "pericia" });
-  });
-  (PERICIAS_POR_ATRIBUTO["Justiça"] || []).forEach(p => {
-    (typeof subsJustiçaAtivas === "function" ? subsJustiçaAtivas(p) : []).forEach(s => {
-      lista.push({ nome: s.nome, tier: especJustiça[s.nome] || "", fonte: "justica" });
-    });
   });
   Object.keys(subLivres).forEach(p => {
     (subLivres[p] || []).forEach(it => {
@@ -5840,7 +6080,6 @@ function habAlinhadoListarSubs() {
 function habAlinhadoSetTier(item, tier) {
   if (item.fonte === "fixa")          especFixas[item.nome] = tier;
   else if (item.fonte === "pericia")  especPericias[item.nome] = tier;
-  else if (item.fonte === "justica")  especJustiça[item.nome] = tier;
   else if (item.fonte === "livre") {
     for (const p in subLivres) {
       const it = subLivres[p].find(x => x.id === item.id);
@@ -6113,8 +6352,22 @@ function removerHabilidade(id) {
 
   const msg = habRemovida.gratis
     ? `Remover "${habRemovida.nome}"? (adquirida por progressão — sem custo de PP)`
-    : `Remover "${habRemovida.nome}"? Os PP gastos NÃO serão devolvidos.`;
+    : `Remover "${habRemovida.nome}"? Os PP gastos serão devolvidos.`;
   if (!confirm(msg)) return;
+
+  // Se a habilidade removida estiver aberta no formulário de edição, cancela a edição
+  // primeiro (sem isso, a dedução já teria sido contabilizada de forma inconsistente).
+  if (_habEditId === id) {
+    _habEditId = null;
+    _habEditOriginalFontes = null;
+    habFontesTemp = [];
+    habResetFormUI();
+  }
+
+  // Devolve os PP gastos em fontes do tipo "perícia" (PP de Upagem e PP Livres são
+  // pools calculados dinamicamente a partir de habilidades[], então já se liberam
+  // sozinhos ao remover a habilidade do array — nada a fazer para eles aqui).
+  habReverterFontesPericia(habRemovida.fontes);
 
   // Undo sheet effects
   const temEfeitoRem = habDesfazerEfeito(habRemovida);
@@ -6127,9 +6380,12 @@ function removerHabilidade(id) {
         e => !(e.sub === habRemovida.nome && (e.opcao === "hab1" || e.opcao === "hab12"))
       );
     });
+  } else {
+    habMostrarAviso(`PP de "${habRemovida.nome}" devolvidos.`, "ok");
   }
 
   habilidades.splice(idx, 1);
+  atualizarUI();
   renderHabLista();
   renderHabFontes();
   renderCatalogoBrowser();
@@ -6157,11 +6413,13 @@ function renderHabLista() {
     const cfg = HAB_TIPOS[h.tipo];
     const fontesStr = h.fontes.map(f =>
       f.tipo === "upagem" ? `${f.pp}PP de Upagem` :
+      f.tipo === "ppded"  ? `${f.pp}PP de Dedicação` :
       f.tipo === "livre"  ? `${f.pp}PP livres (${f.atrib})` :
       `${f.pp}PP de ${f.pericia}`
     ).join(", ");
     const atribKey  = (h.atrib || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z]/g,"");
-    return `<div class="hab-item hab-atrib-${atribKey}">
+    const emEdicao  = _habEditId === h.id;
+    return `<div class="hab-item hab-atrib-${atribKey}${emEdicao ? " hab-item-editando" : ""}">
       <div class="hab-item-accent"></div>
       <div class="hab-item-info">
         <div class="hab-item-header">
@@ -6176,7 +6434,10 @@ function renderHabLista() {
         ${!h.gratis && h.fontes.length ? `<div class="hab-item-fontes">${fontesStr}</div>` : ""}
         ${h.nome === "ALINHADO PELO MEIO:" ? `<button type="button" class="hab-item-ajustar" style="margin-top:6px;font-size:0.78em;padding:3px 8px;border-radius:5px;cursor:pointer;background:rgba(85,131,217,.12);color:var(--accent);border:1px solid rgba(85,131,217,.3);" onclick="habAlinhadoAbrirPopup(${h.id})">Ajustar Ruim/Bom</button>` : ""}
       </div>
-      <button type="button" class="hab-item-remove" onclick="removerHabilidade(${h.id})" title="Remover">×</button>
+      <div class="hab-item-actions">
+        <button type="button" class="hab-item-edit" onclick="habEditar(${h.id})" title="Editar">Editar</button>
+        <button type="button" class="hab-item-remove" onclick="removerHabilidade(${h.id})" title="Remover">×</button>
+      </div>
     </div>`;
   }).join("");
 }
@@ -6770,6 +7031,7 @@ function fichaSerializar() {
     ppUpagemPool,
     ppGastoHabilidades,
     ppGastoHabilidadesProg,
+    ppGastoHabilidadesDed,
     ppHabEfeito,
     // Especializações
     especFixas,
@@ -6868,6 +7130,7 @@ function fichaRestaurar(data) {
   if (typeof data.ppUpagemPool === "number") { ppUpagemPool = data.ppUpagemPool; }
   if (data.ppGastoHabilidades) Object.assign(ppGastoHabilidades, data.ppGastoHabilidades);
   if (data.ppGastoHabilidadesProg) Object.assign(ppGastoHabilidadesProg, data.ppGastoHabilidadesProg);
+  if (data.ppGastoHabilidadesDed) Object.assign(ppGastoHabilidadesDed, data.ppGastoHabilidadesDed);
   if (data.ppHabEfeito) Object.assign(ppHabEfeito, data.ppHabEfeito);
 
   // Especializações
