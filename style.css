@@ -821,6 +821,14 @@ button[onclick*="armaRemoverDado"], button[onclick*="invRemover"] {
   padding: 1px 6px;
   white-space: nowrap;
 }
+.ded-resumo-nivel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 120px;
+}
 
 /* Subperícas */
 .subpericia-linha {

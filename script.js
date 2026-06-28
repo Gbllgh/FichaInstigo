@@ -856,6 +856,7 @@ function setProgDirecto(p, novoValor) {
   if (base + novoValor + ppDed > maxima) novoValor = maxima - base - ppDed;
   if (novoValor < 0) novoValor = 0;
   ppProgressao[p] = novoValor;
+  if (typeof habAlinhadoRecalcular === "function") habAlinhadoRecalcular();
   atualizarUI();
   renderPPProgressao();
 }
@@ -945,11 +946,13 @@ function renderSubsJustiçaEspec(pericia, containerEl) {
   const ativas = subsJustiçaAtivas(pericia);
   if (!ativas.length) return;
 
+  const total = calcValorPericia(pericia);
   let html = `<div class="ded-subs-espec">`;
   ativas.forEach(s => {
     html += `<div class="subpericia-linha">
       <span class="subpericia-tag">↳</span>
       <div class="subpericia-nome">${s.nome}</div>
+      <span class="pericia-total">${total}</span>
     </div>`;
   });
   html += `</div>`;
@@ -969,16 +972,21 @@ function totalPPPericia(p) {
 }
 
 function renderJustiçaExtra(pericia) {
-  const el = document.getElementById(`justica-extra-${cssId(pericia)}`);
+  const pEsc    = cssId(pericia);
+  const el      = document.getElementById(`justica-extra-${pEsc}`);
+  const nivelEl = document.getElementById(`ded-resumo-nivel-${pEsc}`);
+  const totalEl = document.getElementById(`ded-resumo-total-${pEsc}`);
   if (!el) return;
+
+  if (totalEl) totalEl.textContent = calcValorPericia(pericia);
 
   if (pericia === "Financeiro") {
     const info = infoFinanceiro();
-    const nLabel = NIVEL_DEDICACAO[info.nivel]?.label || "Sem nível";
     const colLabel = ["Justiça 1–2","Justiça 3–4","Justiça 5"][info.col];
-    el.innerHTML = `
-      <div class="ded-nivel-badge">Nível ${["0","I","II","III"][info.nivel]} · ${colLabel}</div>
-      <div class="ded-recursos"><span class="ded-valor-fin">${info.valor}</span></div>`;
+    if (nivelEl) nivelEl.innerHTML =
+      `<div class="ded-nivel-badge">Nível ${["0","I","II","III"][info.nivel]} · ${colLabel}</div>
+       <div class="ded-valor-fin">${info.valor}</div>`;
+    el.innerHTML = "";
     return;
   }
 
@@ -998,9 +1006,16 @@ function renderJustiçaExtra(pericia) {
       ? `Todas as performances desbloqueadas`
       : `${sel} / ${disp} selecionada${disp!==1?"s":""}${livres>0?" · "+livres+" livre"+(livres>1?"s":""):""}`;
 
-    let html = `<div class="ded-nivel-badge${disp===0?" ded-vazio":""}">${badge}</div>`;
-    html += `<div class="ded-perf-checkboxes">`;
+    if (nivelEl) {
+      let resumo = `<div class="ded-nivel-badge${disp===0?" ded-vazio":""}">${badge}</div>`;
+      if (!todas && pp > 0) {
+        const prox = [3,6,9,12,15,18,20].find(v => v > pp);
+        if (prox) resumo += `<div class="ded-prox">Próxima em ${prox} PP</div>`;
+      }
+      nivelEl.innerHTML = resumo;
+    }
 
+    let html = `<div class="ded-perf-checkboxes">`;
     LISTA_PERFORMANCES.forEach(perf => {
       const checked    = performancesSelecionadas.has(perf);
       const semSlot    = !checked && !todas && sel >= disp;
@@ -1015,13 +1030,7 @@ function renderJustiçaExtra(pericia) {
         ${perf}
       </label>`;
     });
-
     html += `</div>`;
-
-    if (!todas && pp > 0) {
-      const prox = [3,6,9,12,15,18,20].find(v => v > pp);
-      if (prox) html += `<div class="ded-prox">Próxima performance em ${prox} PP</div>`;
-    }
 
     el.innerHTML = html;
     renderSubsJustiçaEspec("Performance", el);
@@ -1031,14 +1040,14 @@ function renderJustiçaExtra(pericia) {
 
   if (pericia === "Dirigir") {
     const pilotas = pilotaveisDesbloqueadosPP(totalPPPericia("Dirigir"));
-    if (!pilotas.length) { el.innerHTML = `<div class="ded-nivel-badge ded-vazio">Nenhum pilotável desbloqueado</div>`; return; }
-    let html = ``;
-    pilotas.forEach(t => {
-      html += `<div class="ded-nivel-badge">${t.tipo}`;
-      if (t.exemplos) html += ` <span class="ded-exemplos">(${t.exemplos})</span>`;
-      html += `</div>`;
-    });
-    el.innerHTML = html;
+    if (nivelEl) {
+      if (!pilotas.length) {
+        nivelEl.innerHTML = `<div class="ded-nivel-badge ded-vazio">Nenhum pilotável desbloqueado</div>`;
+      } else {
+        nivelEl.innerHTML = pilotas.map(t => `<div class="ded-nivel-badge">${t.tipo}</div>`).join("");
+      }
+    }
+    el.innerHTML = "";
     renderSubsJustiçaEspec("Dirigir", el);
     return;
   }
@@ -1046,17 +1055,23 @@ function renderJustiçaExtra(pericia) {
   // Perícias com níveis (Adestramento, Medicina, Pedagogia, Mecânica)
   const pp    = totalPPPericia(pericia);
   const nivel = nivelJustiça(pp);
-  if (nivel === 0) { el.innerHTML = `<div class="ded-nivel-badge ded-vazio">Sem nível (mín. 5 PP para Nível I)</div>`; return; }
+  if (nivel === 0) {
+    if (nivelEl) nivelEl.innerHTML = `<div class="ded-nivel-badge ded-vazio">Sem nível (mín. 5 PP para Nível I)</div>`;
+    el.innerHTML = "";
+    return;
+  }
   const habs  = habilidadesDesbloqueadas(pericia);
   const nLabel = ["","I","II","III"][nivel];
-  let html = `<div class="ded-nivel-badge">Nível ${nLabel}</div>`;
-  habs.forEach(h => { html += `<div class="ded-hab">${h}</div>`; });
-  // Próximo nível
-  if (nivel < 3) {
-    const proxPP = NIVEL_DEDICACAO[nivel+1].pp;
-    html += `<div class="ded-prox">Próximo nível em ${proxPP} PP</div>`;
+  if (nivelEl) {
+    let resumo = `<div class="ded-nivel-badge">Nível ${nLabel}</div>`;
+    habs.forEach(h => { resumo += `<div class="ded-hab">${h}</div>`; });
+    if (nivel < 3) {
+      const proxPP = NIVEL_DEDICACAO[nivel+1].pp;
+      resumo += `<div class="ded-prox">Próximo nível em ${proxPP} PP</div>`;
+    }
+    nivelEl.innerHTML = resumo;
   }
-  el.innerHTML = html;
+  el.innerHTML = "";
   renderSubsJustiçaEspec(pericia, el);
 }
 
@@ -1508,27 +1523,45 @@ function calcRolar() {
   const vAtrib   = atrib   ? calcValorAtrib(atrib)   : 0;
   const vPericia = pericia ? calcValorPericia(pericia): 0;
 
+  // Plenamente Atribuído — bônus pleno: usa o total da perícia em vez da média
+  const plenoBonusAtivo = !!(atrib && pericia && habPlenoBonusAtivo(atrib));
+  const mediaNormal = Math.floor((vAtrib + vPericia) / 2);
+  const baseCalc = plenoBonusAtivo ? vPericia : mediaNormal;
+
   // Bônus
-  const bonus = Math.floor((vAtrib + vPericia) / 2) + vEspec + modExtra
+  const bonus = baseCalc + vEspec + modExtra
     + calcHabsSelecionadas.reduce((s, h) => s + (h.mod || 0), 0);
+
+  // Plenamente Atribuído — dados extras de vantagem (1 a cada 3 pontos do atributo efetivo)
+  const extraDados = (atrib && habPlenoVantAtivo(atrib)) ? Math.floor(vAtrib / 3) : 0;
 
   // Rolar d20
   function rollD20() { return Math.floor(Math.random() * 20) + 1; }
-  let d20a = rollD20();
-  let d20b = null;
   let d20final, d20desc;
 
-  if (vant === "vant") {
-    d20b = rollD20();
-    d20final = Math.max(d20a, d20b);
-    d20desc  = `d20 com vantagem: [${d20a}, ${d20b}] → ${d20final}`;
-  } else if (vant === "desvant") {
-    d20b = rollD20();
-    d20final = Math.min(d20a, d20b);
-    d20desc  = `d20 com desvantagem: [${d20a}, ${d20b}] → ${d20final}`;
+  if (extraDados > 0) {
+    // "Plenamente Atribuído" garante vantagem: rola 1 (padrão) + 1 se vantagem
+    // manual estiver marcada + os dados extras da habilidade, e fica com o maior
+    const rolls = [rollD20()];
+    if (vant === "vant") rolls.push(rollD20());
+    for (let i = 0; i < extraDados; i++) rolls.push(rollD20());
+    d20final = Math.max(...rolls);
+    d20desc  = `d20 (Plenamente Atribuído, +${extraDados} dado${extraDados>1?"s":""} de vantagem): [${rolls.join(", ")}] → ${d20final}`;
   } else {
-    d20final = d20a;
-    d20desc  = `d20: ${d20final}`;
+    let d20a = rollD20();
+    let d20b = null;
+    if (vant === "vant") {
+      d20b = rollD20();
+      d20final = Math.max(d20a, d20b);
+      d20desc  = `d20 com vantagem: [${d20a}, ${d20b}] → ${d20final}`;
+    } else if (vant === "desvant") {
+      d20b = rollD20();
+      d20final = Math.min(d20a, d20b);
+      d20desc  = `d20 com desvantagem: [${d20a}, ${d20b}] → ${d20final}`;
+    } else {
+      d20final = d20a;
+      d20desc  = `d20: ${d20final}`;
+    }
   }
 
   const total = d20final + bonus;
@@ -1542,8 +1575,12 @@ function calcRolar() {
   const parts = [];
   if (atrib)   parts.push(`${atrib}(${vAtrib})`);
   if (pericia) parts.push(`${pericia}(${vPericia})`);
-  if (atrib || pericia) parts.push(`→ (${vAtrib}+${vPericia})/2 = ${Math.floor((vAtrib+vPericia)/2)}`);
-  if (vEspec !== 0)   parts.push(`${especNome}(${vEspec > 0 ? "+" : ""}${vEspec})`);
+  if (plenoBonusAtivo) {
+    parts.push(`→ Plenamente Atribuído: usa só a Perícia = ${vPericia}`);
+  } else if (atrib || pericia) {
+    parts.push(`→ (${vAtrib}+${vPericia})/2 = ${mediaNormal}`);
+  }
+  if (vEspec !== 0)   parts.push(especNome);
   if (modExtra !== 0) parts.push(`mod.(${modExtra > 0 ? "+" : ""}${modExtra})`);
   calcHabsSelecionadas.forEach(h => {
     if (h.mod !== 0) parts.push(`${h.nome.substring(0,20)}(${h.mod > 0 ? "+" : ""}${h.mod})`);
@@ -2188,6 +2225,7 @@ ATRIBUTOS.forEach(atrib=>{
   PERICIAS_POR_ATRIBUTO[atrib].forEach(p=>{
     const pEsc=cssId(p);
     const isPoderEsp = atrib === "Poder";
+    const isDedicEsp  = PERICIAS_DEDICACAO_NIVEL.includes(p) || PERICIAS_DEDICACAO_NORMAL.includes(p);
     html+=`<div class="pericia-linha">
       <div class="pericia-nome">${p}</div>
       <div class="pericia-ctrl">
@@ -2218,6 +2256,10 @@ ATRIBUTOS.forEach(atrib=>{
         <span class="espec-modificador" id="mod-per-${pEsc}"></span>
         <span class="pericia-total" id="tot-per-${pEsc}"></span>
       ` : ""}
+      ${isDedicEsp ? `
+        <div class="ded-resumo-nivel" id="ded-resumo-nivel-${pEsc}"></div>
+        <span class="pericia-total" id="ded-resumo-total-${pEsc}"></span>
+      ` : ""}
     </div>
     ${isPoderEsp && p === "Desarmado" ? `
       <div class="subpericia-linha" style="padding-left:20px;">
@@ -2233,7 +2275,6 @@ ATRIBUTOS.forEach(atrib=>{
     const temLivre    = subs.includes("LIVRE");
     const temLivreLang= subs.includes("LIVRE_LANG");
     const isAutoC     = subs.includes("AUTO_CONFORTO");
-    const isDedicEsp  = PERICIAS_DEDICACAO_NIVEL.includes(p) || PERICIAS_DEDICACAO_NORMAL.includes(p);
     const fixas       = subs.filter(s=>s!=="LIVRE"&&s!=="LIVRE_LANG"&&s!=="AUTO_CONFORTO");
 
     fixas.forEach(s=>{
@@ -5994,6 +6035,10 @@ function adicionarFeiticoProgresso(nome, rud) {
 // Registry of habilidade effects: nome → { apply(hab), undo(hab) }
 const HAB_EFFECTS = {};
 
+// Hooks executados uma vez, logo após o efeito de uma habilidade ser aplicado
+// (ex: abrir um pop-up de configuração adicional)
+const HAB_POST_APPLY = {};
+
 // Helper: modify a pericia value (base), clamped to max
 function habModPericia(p, delta) {
   pericias[p] = Math.max(0, (pericias[p] || 0) + delta);
@@ -6013,16 +6058,22 @@ function habRemEspec(tipo) {
 
 // ── ALINHADO PELO MEIO ────────────────────────────────────────────────────────
 // Regra: "nenhuma Perícia pode ter valor inferior a 5" enquanto a habilidade
-// estiver ativa. Isso é um PISO PERMANENTE, não um bônus fixo calculado uma
-// única vez — por isso precisa ser recalculado sempre que qualquer fator que
-// compõe o valor da perícia mudar (progressão, PP de Justiça, etc), senão a
-// perícia pode cair de novo abaixo de 5 depois que o jogador realoca pontos.
+// estiver ativa. O bônus concedido por essa habilidade funciona como uma
+// catraca (ratchet): ele só AUMENTA, nunca diminui sozinho. Isso garante duas
+// coisas ao mesmo tempo:
+//   1) Se o jogador realocar PP para fora da perícia (e ela ameaçar cair abaixo
+//      de 5), o bônus sobe o suficiente para manter o piso — por isso ainda
+//      precisa ser recalculado sempre que progressão/PP de Justiça/conexão mudarem.
+//   2) Se o jogador investir MAIS PP na perícia (ex: progressão), esse PP soma
+//      normalmente por cima do bônus já concedido, em vez de "derreter" o bônus
+//      (ex: piso de 5 + 3 PP novos = 8, não 5 travado).
 function habAlinhadoAtivo() {
   return habilidades.some(h => h.nome === "ALINHADO PELO MEIO:");
 }
 
 // Recalcula ppHabEfeito para TODAS as perícias com base no estado atual,
-// garantindo o piso de 5 enquanto "Alinhado pelo Meio" estiver ativo.
+// garantindo o piso de 5 enquanto "Alinhado pelo Meio" estiver ativo, sem nunca
+// reduzir um bônus já concedido (ver comentário acima).
 // Deve ser chamada sempre que base/progressão/PP de Justiça/conexão mudarem.
 function habAlinhadoRecalcular() {
   if (!habAlinhadoAtivo()) return;
@@ -6034,9 +6085,12 @@ function habAlinhadoRecalcular() {
       const bc   = typeof calcBonusPericiaConexao === "function" ? calcBonusPericiaConexao(p) : 0;
       // Tudo que NÃO é o próprio bônus da habilidade:
       const semHab = base + prog + ded + bc;
-      ppHabEfeito[p] = Math.max(0, 5 - semHab);
+      const necessario = Math.max(0, 5 - semHab);
+      ppHabEfeito[p] = Math.max(ppHabEfeito[p] || 0, necessario);
     });
   });
+  if (typeof refreshHabBadges === "function") refreshHabBadges();
+  if (typeof renderPPProgressao === "function") renderPPProgressao();
 }
 
 HAB_EFFECTS["ALINHADO PELO MEIO:"] = {
@@ -6048,6 +6102,8 @@ HAB_EFFECTS["ALINHADO PELO MEIO:"] = {
   undo(hab) {
     // Zera o bônus de habilidade de todas as perícias (o piso deixa de existir)
     Object.keys(ppHabEfeito).forEach(p => { ppHabEfeito[p] = 0; });
+    if (typeof refreshHabBadges === "function") refreshHabBadges();
+    if (typeof renderPPProgressao === "function") renderPPProgressao();
     habRemEspec("b");
     // Desfaz a troca de especialização (Ruim removida / Bom adicionado), se já tiver sido feita
     if (hab._alinhado_addedB) {
@@ -6189,6 +6245,95 @@ function habAlinhadoConfirmar() {
   habMostrarAviso(`Especializações de "Alinhado pelo Meio" atualizadas.`, "ok");
 }
 
+// ── PLENAMENTE ATRIBUÍDO ──────────────────────────────────────────────────────
+// Tipo II · Justiça · 12 PP
+// Efeito 1: escolha até 2 Atributos — em testes deles, a Calculadora usa o valor
+// TOTAL da perícia em vez da média (atributo+perícia)/2.
+// Efeito 2: escolha até 2 Atributos (podem repetir os de cima ou não) — a cada
+// 3 pontos do valor EFETIVO do atributo (calcValorAtrib, que cresce com nível/
+// conexão), +1 dado de vantagem nos testes desse atributo.
+HAB_EFFECTS["PLENAMENTE ATRIBUÍDO:"] = {
+  apply(hab) {
+    if (!hab._plenoBonus) hab._plenoBonus = [];
+    if (!hab._plenoVant)  hab._plenoVant  = [];
+  },
+  undo(hab) {
+    hab._plenoBonus = [];
+    hab._plenoVant  = [];
+  }
+};
+HAB_POST_APPLY["PLENAMENTE ATRIBUÍDO:"] = (hab) => habPlenoAbrirPopup(hab.id);
+
+function habPlenoBonusAtivo(atrib) {
+  return habilidades.some(h => h.nome === "PLENAMENTE ATRIBUÍDO:" && (h._plenoBonus || []).includes(atrib));
+}
+function habPlenoVantAtivo(atrib) {
+  return habilidades.some(h => h.nome === "PLENAMENTE ATRIBUÍDO:" && (h._plenoVant || []).includes(atrib));
+}
+
+let _plenoHabId = null;
+
+function habPlenoAbrirPopup(habId) {
+  _plenoHabId = habId;
+  renderPlenoPopup();
+  const overlay = document.getElementById("pleno-overlay");
+  if (overlay) overlay.classList.add("open");
+}
+function habPlenoFechar() {
+  const overlay = document.getElementById("pleno-overlay");
+  if (overlay) overlay.classList.remove("open");
+  _plenoHabId = null;
+}
+function renderPlenoPopup() {
+  const cont = document.getElementById("pleno-modal-content");
+  if (!cont) return;
+  const hab = habilidades.find(h => h.id === _plenoHabId);
+  if (!hab) return;
+  const bonusSel = hab._plenoBonus || [];
+  const vantSel  = hab._plenoVant  || [];
+
+  const checklist = (grupo, selecionados) => ATRIBUTOS.map(a => `
+    <label style="display:flex;gap:6px;align-items:center;font-size:0.85em;padding:3px 0;">
+      <input type="checkbox" name="${grupo}" value="${a}" ${selecionados.includes(a) ? "checked" : ""}>
+      ${atribDisplay(a)}
+    </label>`).join("");
+
+  cont.innerHTML = `
+    <h4 style="margin-top:0;">Plenamente Atribuído</h4>
+    <p style="font-size:0.85em;color:#aab;line-height:1.4;">Escolha até 2 Atributos para cada efeito (podem ser os mesmos ou diferentes).</p>
+    <div style="margin:14px 0;">
+      <strong style="font-size:0.85em;">Bônus pleno (usa o total da perícia, sem dividir por 2):</strong>
+      <div id="pleno-grupo-bonus" style="margin-top:6px;">${checklist("pleno-bonus", bonusSel)}</div>
+    </div>
+    <div style="margin:14px 0;">
+      <strong style="font-size:0.85em;">Dados de vantagem (1 a cada 3 pontos do atributo):</strong>
+      <div id="pleno-grupo-vant" style="margin-top:6px;">${checklist("pleno-vant", vantSel)}</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+      <button type="button" class="save-btn" onclick="habPlenoFechar()">Fechar</button>
+      <button type="button" class="save-btn primary" onclick="habPlenoConfirmar()">Confirmar</button>
+    </div>`;
+
+  // Limita a no máximo 2 marcados por grupo
+  ["pleno-bonus","pleno-vant"].forEach(grupo => {
+    cont.querySelectorAll(`input[name="${grupo}"]`).forEach(chk => {
+      chk.addEventListener("change", () => {
+        const marcados = cont.querySelectorAll(`input[name="${grupo}"]:checked`);
+        if (marcados.length > 2) chk.checked = false;
+      });
+    });
+  });
+}
+function habPlenoConfirmar() {
+  const hab  = habilidades.find(h => h.id === _plenoHabId);
+  const cont = document.getElementById("pleno-modal-content");
+  if (!hab || !cont) { habPlenoFechar(); return; }
+  hab._plenoBonus = [...cont.querySelectorAll('input[name="pleno-bonus"]:checked')].map(c => c.value);
+  hab._plenoVant  = [...cont.querySelectorAll('input[name="pleno-vant"]:checked')].map(c => c.value);
+  habPlenoFechar();
+  habMostrarAviso(`Atributos de "Plenamente Atribuído" atualizados.`, "ok");
+}
+
 // ── SABE-TUDO ────────────────────────────────────────────────────────────────
 HAB_EFFECTS["SABE-TUDO:"] = {
   apply() { habAddEspec("b"); habAddEspec("b"); habAddEspec("mb"); },
@@ -6306,7 +6451,6 @@ function refreshHabBadges() {
 
 // Hooks executados uma vez, logo após o efeito de uma habilidade ser aplicado
 // (ex: abrir um pop-up de configuração adicional)
-const HAB_POST_APPLY = {};
 HAB_POST_APPLY["ALINHADO PELO MEIO:"] = (hab) => habAlinhadoAbrirPopup(hab.id);
 
 function habAplicarEfeito(hab) {
@@ -6442,6 +6586,7 @@ function renderHabLista() {
         ${h.desc ? `<div class="hab-item-desc">${escHTML(h.desc).replace(/\n/g,'<br>')}</div>` : ""}
         ${!h.gratis && h.fontes.length ? `<div class="hab-item-fontes">${fontesStr}</div>` : ""}
         ${h.nome === "ALINHADO PELO MEIO:" ? `<button type="button" class="hab-item-ajustar" style="margin-top:6px;font-size:0.78em;padding:3px 8px;border-radius:5px;cursor:pointer;background:rgba(85,131,217,.12);color:var(--accent);border:1px solid rgba(85,131,217,.3);" onclick="habAlinhadoAbrirPopup(${h.id})">Ajustar Ruim/Bom</button>` : ""}
+        ${h.nome === "PLENAMENTE ATRIBUÍDO:" ? `<button type="button" class="hab-item-ajustar" style="margin-top:6px;font-size:0.78em;padding:3px 8px;border-radius:5px;cursor:pointer;background:rgba(85,131,217,.12);color:var(--accent);border:1px solid rgba(85,131,217,.3);" onclick="habPlenoAbrirPopup(${h.id})">Ajustar Atributos</button>` : ""}
       </div>
       <div class="hab-item-actions">
         <button type="button" class="hab-item-edit" onclick="habEditar(${h.id})" title="Editar">Editar</button>

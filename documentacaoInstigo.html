@@ -391,6 +391,9 @@
     <div class="card card-accent-yellow">
       <h4 style="margin-top:0">📌 Atualizações Recentes</h4>
       <ul style="padding-left:20px;color:var(--text2);font-size:.88em;line-height:1.9;">
+        <li>Nova habilidade implementada: <strong>Plenamente Atribuído</strong> (Tipo II, Justiça) — veja <a href="#aba-habilidades">Efeitos automáticos</a> e <a href="#calculadora">Calculadora de Dados</a>.</li>
+        <li><strong>Alinhado pelo Meio</strong> corrigido: o bônus da habilidade agora funciona como um piso que só aumenta — PP que o jogador investe depois soma normalmente por cima, em vez de "derreter" o bônus já concedido.</li>
+        <li><strong>Perícias de Dedicação (Justiça):</strong> layout reorganizado — o nível/desbloqueio e o total de PP agora aparecem direto na linha da perícia, em vez de numa linha separada abaixo.</li>
         <li><strong>Intimidação</strong> agora é subperícia de <strong>Determinação</strong> (era de Carisma).</li>
         <li><strong>Perícias de Dedicação</strong> (Justiça) não têm mais especialização — só desbloqueios por PP.</li>
         <li><strong>Especializações:</strong> Muito Bom agora é +3 e dá Vantagem; Muito Ruim agora é −3 e dá Desvantagem (antes eram +5/−5 sem vantagem/desvantagem).</li>
@@ -540,6 +543,10 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
 
     <div class="callout callout-warning">
       <strong>Perícias de Dedicação (Justiça) não têm especialização.</strong> Financeiro, Performance, Adestramento, Medicina, Dirigir, Pedagogia e Mecânica não recebem MB/B/R/MR — suas subperícias (ex: "Animais selvagens", "Pilotáveis Pesados") são apenas desbloqueios por PP investido, sem seletor de especialização nem bônus/penalidade.
+    </div>
+
+    <div class="callout callout-tip">
+      <strong>Layout da linha:</strong> nas 7 perícias de Justiça, a própria linha mostra duas áreas além dos controles de PP/progressão: o que foi <strong>desbloqueado por nível</strong> (badge "Nível X", nomes desbloqueados em verde, "$valor" do Financeiro, status da Performance, tipos de pilotável do Dirigir, etc.) e, mais à direita, o <strong>total de PP</strong> da perícia (base + progressão + Dedicação + bônus de conexão + bônus de habilidade). A lista detalhada com cada subperícia individual e seu próprio total continua abaixo, como uma seção separada — útil quando há vários itens desbloqueados ao mesmo tempo.
     </div>
 
     <!-- ══════════════════════════════════════════════ -->
@@ -716,7 +723,27 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
     </ol>
 
     <h3>Efeitos automáticos</h3>
-    <p>Algumas habilidades do catálogo têm efeitos que se aplicam automaticamente à ficha (ex: +1 Defesa, bônus em subperícas específicas). Quando isso acontece, um aviso em verde confirma a aplicação.</p>
+    <p>Algumas habilidades têm efeitos programados que se aplicam (e se desfazem) automaticamente na ficha quando você adiciona ou remove a habilidade — sem precisar ajustar nada manualmente. Isso é controlado por nome exato no código (objeto <code>HAB_EFFECTS</code>), então a habilidade precisa ter o nome cadastrado (com os dois-pontos no final, ex: <code>ALINHADO PELO MEIO:</code>) para o efeito disparar.</p>
+
+    <table>
+      <thead><tr><th>Habilidade</th><th>O que faz na ficha</th></tr></thead>
+      <tbody>
+        <tr><td>Alinhado pelo Meio</td><td>Garante um piso de 5 PP em todas as perícias (o bônus só aumenta, nunca diminui sozinho com PP investido depois) + 1 especialização "Bom" extra</td></tr>
+        <tr><td>Sabe-Tudo</td><td>+2 especializações "Bom" extra + 1 "Muito Bom" extra</td></tr>
+        <tr><td>Grandalhão</td><td>+3 PV por nível upado</td></tr>
+        <tr><td>Entregue às Delícias</td><td>+5 TE por nível upado</td></tr>
+        <tr><td>Receptáculo Rudimentar</td><td>+3 PM por nível upado</td></tr>
+        <tr><td>Corpo São Mente Sã</td><td>+3 PP de progressão por nível upado</td></tr>
+        <tr><td>Pele Impenetrável</td><td>+1 Defesa por nível upado</td></tr>
+        <tr><td>Plenamente Atribuído</td><td>Abre um popup de configuração — escolha até 2 Atributos para usar o total da Perícia em vez da média na <a href="#calculadora">Calculadora de Dados</a>, e até 2 Atributos para ganhar dados extras de vantagem (1 a cada 3 pontos do valor efetivo do atributo)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <strong>Habilidades configuráveis:</strong> "Alinhado pelo Meio" e "Plenamente Atribuído" abrem um popup logo após serem adicionadas, pedindo escolhas extras (especialização a trocar, ou quais Atributos recebem cada efeito). Um botão <strong>Ajustar</strong> aparece no card da habilidade na lista para reabrir esse popup e mudar as escolhas depois, sem precisar remover e recriar a habilidade.
+    </div>
+
+    <p style="font-size:.88em;">Habilidades sem efeito cadastrado no código continuam funcionando normalmente como anotação — descrição salva, PP gasto contabilizado — só não alteram nenhum número automaticamente na ficha.</p>
 
     <h3>Editando uma habilidade já adquirida</h3>
     <p>Cada habilidade na lista tem um botão <strong>Editar</strong> além do <strong>×</strong> de remover. Ao clicar:</p>
@@ -787,6 +814,9 @@ PERICIAS_POR_ATRIBUTO["Poder"] = [
 
     <h3>Histórico</h3>
     <p>As últimas 15 rolagens ficam salvas no histórico. Resultados especiais são marcados: <strong>💀</strong> Falha Crítica (1 natural) e <strong>✨</strong> Sucesso Crítico (20 natural).</p>
+
+    <h3>Fórmula do bônus</h3>
+    <p>Por padrão, o bônus de um teste é <code>floor((Atributo + Perícia) / 2) + especialização + mod. extra + bônus de habilidades selecionadas</code>. Se a habilidade <strong>Plenamente Atribuído</strong> estiver configurada para o Atributo selecionado, a média é ignorada e o bônus usa o <strong>total da Perícia sozinho</strong> (o resumo da rolagem mostra "Plenamente Atribuído: usa só a Perícia"). Se estiver configurada para dados de vantagem, soma-se <code>floor(valor efetivo do Atributo / 3)</code> dados d20 extras à rolagem, e fica com o maior entre todos.</p>
 
     <!-- ══════════════════════════════════════════════ -->
     <h2 id="save-load">Salvar & Carregar</h2>
